@@ -1,18 +1,13 @@
-name: Build & Push Docker Image
+name: Build Gradle application
 
 on:
   workflow_call:
     inputs:
-      java-version:
+      dockerfile-path:
         required: false
         type: string
-        description: Java version to build with
-        default: '21'
-      gradle-task:
-        required: false
-        type: string
-        description: Gradle task to run
-        default: './gradlew --configuration-cache build shadowJar'
+        description: Path to the Dockerfile
+        default: 'Dockerfile'
       image-tag:
         required: false
         type: string
@@ -31,24 +26,12 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: actions/setup-java@v5
-        with:
-          distribution: 'temurin'
-          java-version: ${{ inputs.java-version }}
-
-      - name: Build and test application
-        uses: gradle/actions/setup-gradle@v4
-        env: # Eksluder test dependencies
-          DEPENDENCY_GRAPH_INCLUDE_CONFIGURATIONS: compileClasspath|runtimeClasspath
-        with:
-          dependency-graph: generate-and-submit
-      - run: ${{ inputs.gradle-task }}
-
       - name: Push Docker Image to GAR
         uses: nais/docker-build-push@v0
         id: docker-build-push
         with:
           team: okonomi
+          dockerfile: ${{ inputs.dockerfile-path }}
           tag: ${{ inputs.image-tag }}
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}

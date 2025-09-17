@@ -1,0 +1,36 @@
+name: Build & Push Docker Image
+
+on:
+  workflow_call:
+    inputs:
+      java-version:
+        required: false
+        type: string
+        description: Java version to build with
+        default: '21'
+      gradle-task:
+        required: false
+        type: string
+        description: Gradle task to run
+        default: './gradlew --configuration-cache build shadowJar'
+
+jobs:
+  build-push-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: ${{ inputs.java-version }}
+
+      - name: Build and test application
+        uses: gradle/actions/setup-gradle@v4
+        env: # Eksluder test dependencies
+          DEPENDENCY_GRAPH_INCLUDE_CONFIGURATIONS: compileClasspath|runtimeClasspath
+        with:
+          dependency-graph: generate-and-submit
+      - run: ${{ inputs.gradle-task }}
