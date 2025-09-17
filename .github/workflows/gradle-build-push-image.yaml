@@ -13,6 +13,11 @@ on:
         type: string
         description: Gradle task to run
         default: './gradlew --configuration-cache build shadowJar'
+      dockerfile:
+        required: false
+        type: string
+        description: Path to Dockerfile
+        default: 'Dockerfile'
       image-tag:
         required: false
         type: string
@@ -49,6 +54,7 @@ jobs:
         id: docker-build-push
         with:
           team: okonomi
+          dockerfile: ${{ inputs.dockerfile }}
           tag: ${{ inputs.image-tag }}
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
