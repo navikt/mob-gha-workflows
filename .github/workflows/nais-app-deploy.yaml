@@ -1,4 +1,4 @@
-name: NAIS App Deploy
+name: Deploy application to NAIS
 
 on:
   workflow_call:
@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
-          
+
       - name: Deploy to Environment
         uses: nais/deploy/actions/deploy@v2
         env:
