@@ -36,8 +36,8 @@ jobs:
         id: docker-build-push
         with:
           team: okonomi
-          docker_context: ${{ inputs.docker-context }}
           dockerfile: ${{ inputs.dockerfile }}
+          docker_context: ${{ inputs.docker-context }}
           tag: ${{ inputs.image-tag }}
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
