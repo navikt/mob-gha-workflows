@@ -15,7 +15,7 @@ on:
         default: '10'
 
 jobs:
-  build-pr:
+  build-test-pr:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

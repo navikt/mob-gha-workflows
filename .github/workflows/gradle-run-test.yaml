@@ -12,7 +12,7 @@ on:
         required: false
         type: string
         description: Gradle task to run
-        default: './gradlew --configuration-cache test'
+        default: './gradlew build installDist --configuration-cache'
 
 jobs:
   run-application-tests:

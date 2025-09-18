@@ -1,4 +1,4 @@
-name: Deploy application to NAIS
+name: Deploy application
 
 on:
   workflow_call:
@@ -17,7 +17,7 @@ on:
         description: Docker image to deploy
 
 jobs:
-  deploy:
+  deploy-application:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

@@ -12,7 +12,7 @@ on:
         required: false
         type: string
         description: Gradle task to run
-        default: './gradlew --configuration-cache installDist'
+        default: './gradlew installDist --configuration-cache'
       docker-context:
         required: false
         type: string
@@ -31,10 +31,10 @@ on:
     outputs:
       image:
         description: Google Artifact Registry image
-        value: ${{ jobs.assemble-build-push-image.outputs.image }}
+        value: ${{ jobs.assemble-application-build-push-image.outputs.image }}
 
 jobs:
-  assemble-build-push-image:
+  assemble-application-build-push-image:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

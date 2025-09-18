@@ -20,7 +20,7 @@ on:
         default: 'pnpm run build'
 
 jobs:
-  build-pr:
+  build-test-pr:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

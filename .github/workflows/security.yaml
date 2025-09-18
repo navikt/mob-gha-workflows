@@ -1,4 +1,4 @@
-name: Security
+name: Security scan CodeQL/Trivy
 
 on:
   workflow_call:
@@ -19,7 +19,7 @@ env:
   TRIVY_DB_REPOSITORY: "public.ecr.aws/aquasecurity/trivy-db"
 
 jobs:
-  security-analyze:
+  security-scan-codeql-trivy:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
