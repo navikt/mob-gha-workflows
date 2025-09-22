@@ -13,6 +13,11 @@ on:
         type: string
         description: Node version to build with
         default: '22'
+      build-command:
+        required: false
+        type: string
+        description: Command to build the application
+        default: 'pnpm run build'
       image-tag:
         required: false
         type: string
@@ -23,11 +28,6 @@ on:
         type: string
         description: Suffix to append to the image tag
         default: ''
-      build-command:
-        required: false
-        type: string
-        description: Command to build the application
-        default: 'pnpm run build'
     secrets:
       ASTRO_KEY:
         required: false
