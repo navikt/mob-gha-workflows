@@ -13,6 +13,16 @@ on:
         type: string
         description: Node version to build with
         default: '22'
+      server-build-command:
+        required: false
+        type: string
+        description: Command to build the server
+        default: 'cd server && pnpm run build'
+      client-build-command:
+        required: false
+        type: string
+        description: Command to build the client
+        default: 'pnpm run build'
       image-tag:
         required: false
         type: string
@@ -61,10 +71,10 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
       - name: Build server
-        run: cd server && pnpm run build
+        run: ${{ inputs.server-build-command }}
 
       - name: Build app
-        run: pnpm run build
+        run: ${{ inputs.client-build-command }}
 
       - name: Push Docker Image to GAR
         uses: nais/docker-build-push@v0
