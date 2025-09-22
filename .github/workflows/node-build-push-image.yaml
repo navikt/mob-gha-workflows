@@ -28,6 +28,11 @@ on:
         type: string
         description: Docker image tag
         default: 'latest'
+      image-suffix:
+        required: false
+        type: string
+        description: Suffix to append to the image tag
+        default: ''
     outputs:
       image:
         description: Google Artifact Registery image
@@ -81,6 +86,7 @@ jobs:
         id: docker-build-push
         with:
           team: okonomi
+          image_suffix: ${{ inputs.image-suffix }}
           tag: ${{ inputs.image-tag }}
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
