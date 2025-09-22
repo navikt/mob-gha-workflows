@@ -13,6 +13,16 @@ on:
         type: string
         description: pnpm version to build with
         default: '10'
+      server-build-command:
+        required: false
+        type: string
+        description: Command to build the server
+        default: 'cd server && pnpm run build'
+      client-build-command:
+        required: false
+        type: string
+        description: Command to build the client
+        default: 'pnpm run build'
 
 jobs:
   build-pr:
@@ -52,7 +62,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
       - name: Build server
-        run: cd server && pnpm run build
+        run: ${{ inputs.server-build-command }}
 
       - name: Build app
-        run: pnpm run build
+        run: ${{ inputs.client-build-command }}
