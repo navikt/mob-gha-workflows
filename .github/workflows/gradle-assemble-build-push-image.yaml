@@ -23,11 +23,11 @@ on:
         type: string
         description: Path to the Dockerfile
         default: 'Dockerfile'
-      image-tag:
+      image-suffix:
         required: false
         type: string
-        description: Docker image tag
-        default: 'latest'
+        description: Suffix to append to the image tag
+        default: ''
     outputs:
       image:
         description: Google Artifact Registry image
@@ -61,7 +61,7 @@ jobs:
           team: okonomi
           dockerfile: ${{ inputs.dockerfile }}
           docker_context: ${{ inputs.docker-context }}
-          tag: ${{ inputs.image-tag }}
+          image_suffix: ${{ inputs.image-suffix }}
 
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
