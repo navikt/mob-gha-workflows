@@ -50,19 +50,25 @@ jobs:
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
 
-      - name: Pull and inspect image
+      - name: Inspect ${{ env.PROD_IMAGE }} details
         run: |
           IMAGE_REF="${{ steps.login.outputs.registry }}/${{ env.PROD_IMAGE }}"
           echo "Pulling image: $IMAGE_REF"
           docker pull "$IMAGE_REF"
 
-          echo "Image tags and metadata:"
-          docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.CreatedAt}}" | grep "${{ env.PROD_IMAGE }}"
+          echo ""
+          echo "=== Image Information ==="
+          docker images --format "Repository: {{.Repository}}" | grep "${{ env.PROD_IMAGE }}"
+          docker images --format "Tag: {{.Tag}}" | grep -A1 "${{ env.PROD_IMAGE }}" | tail -1
+          docker images --format "Image ID: {{.ID}}" | grep -A1 "${{ env.PROD_IMAGE }}" | tail -1
+          docker images --format "Created: {{.CreatedAt}}" | grep -A1 "${{ env.PROD_IMAGE }}" | tail -1
+          docker images --format "Size: {{.Size}}" | grep -A1 "${{ env.PROD_IMAGE }}" | tail -1
+          echo ""
 
-          echo "Image inspect (labels and metadata):"
+          echo "=== Image Labels and Metadata ==="
           docker inspect "$IMAGE_REF" --format='{{json .Config.Labels}}' | jq '.'
 
-      - name: Run Trivy vulnerability scanner on docker image
+      - name: Run Trivy vulnerability scanner on docker image ${{ env.PROD_IMAGE }}
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ steps.login.outputs.registry }}/${{ env.PROD_IMAGE }}
