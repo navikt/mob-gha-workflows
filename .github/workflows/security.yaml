@@ -14,7 +14,7 @@ on:
         description: 'Optional suffix to append to the image name (no leading dash).'
 
 env:
-  LATEST_IMAGE: ${{ format('{0}{1}:latest', github.event.repository.name, inputs.image-suffix != '' && format('-{0}', inputs.image-suffix) || '') }}
+  PROD_IMAGE: ${{ format('{0}{1}', github.event.repository.name, inputs.image-suffix != '' && format('-{0}', inputs.image-suffix) || '') }}
   TRIVY_JAVA_DB_REPOSITORY: "public.ecr.aws/aquasecurity/trivy-java-db:1"
   TRIVY_DB_REPOSITORY: "public.ecr.aws/aquasecurity/trivy-db"
 
@@ -53,7 +53,7 @@ jobs:
       - name: Run Trivy vulnerability scanner on docker image
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ steps.login.outputs.registry }}/${{ env.LATEST_IMAGE }}
+          image-ref: ${{ steps.login.outputs.registry }}/${{ env.PROD_IMAGE }}
           ignore-unfixed: true
           format: 'sarif'
           output: 'trivy-results.sarif'
