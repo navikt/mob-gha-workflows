@@ -14,7 +14,7 @@ on:
         description: 'Optional suffix to append to the image name (no leading dash).'
 
 env:
-  PROD_IMAGE: ${{ format('{0}{1}', github.event.repository.name, inputs.image-suffix != '' && format('-{0}', inputs.image-suffix) || '') }}
+  LATEST_PROD_IMAGE: ${{ format('{0}{1}:latest', github.event.repository.name, inputs.image-suffix != '' && format('-{0}', inputs.image-suffix) || '') }}
   TRIVY_JAVA_DB_REPOSITORY: "public.ecr.aws/aquasecurity/trivy-java-db:1"
   TRIVY_DB_REPOSITORY: "public.ecr.aws/aquasecurity/trivy-db"
 
@@ -48,28 +48,28 @@ jobs:
         with:
           team: okonomi
 
-      - name: Inspect ${{ env.PROD_IMAGE }} details
+      - name: Inspect ${{ env.LATEST_PROD_IMAGE }} image details
         run: |
-          IMAGE_REF="${{ steps.login.outputs.registry }}/${{ env.PROD_IMAGE }}"
+          IMAGE_REF="${{ steps.login.outputs.registry }}/${{ env.LATEST_PROD_IMAGE }}"
           echo "Pulling image: $IMAGE_REF"
           docker pull "$IMAGE_REF"
 
           echo ""
           echo "=== Image Information ==="
-          docker images --format "Repository: {{.Repository}}" | grep "${{ env.PROD_IMAGE }}"
-          docker images --format "Tag: {{.Tag}}" | grep -A1 "${{ env.PROD_IMAGE }}" | tail -1
-          docker images --format "Image ID: {{.ID}}" | grep -A1 "${{ env.PROD_IMAGE }}" | tail -1
-          docker images --format "Created: {{.CreatedAt}}" | grep -A1 "${{ env.PROD_IMAGE }}" | tail -1
-          docker images --format "Size: {{.Size}}" | grep -A1 "${{ env.PROD_IMAGE }}" | tail -1
+          docker images --format "Repository: {{.Repository}}" | grep "${{ env.LATEST_PROD_IMAGE }}"
+          docker images --format "Tag: {{.Tag}}" | grep -A1 "${{ env.LATEST_PROD_IMAGE }}" | tail -1
+          docker images --format "Image ID: {{.ID}}" | grep -A1 "${{ env.LATEST_PROD_IMAGE }}" | tail -1
+          docker images --format "Created: {{.CreatedAt}}" | grep -A1 "${{ env.LATEST_PROD_IMAGE }}" | tail -1
+          docker images --format "Size: {{.Size}}" | grep -A1 "${{ env.LATEST_PROD_IMAGE }}" | tail -1
           echo ""
 
           echo "=== Image Labels and Metadata ==="
           docker inspect "$IMAGE_REF" --format='{{json .Config.Labels}}' | jq '.'
 
-      - name: Run Trivy vulnerability scanner on docker image ${{ env.PROD_IMAGE }}
+      - name: Perform Trivy vulnerability scan on ${{ env.LATEST_PROD_IMAGE }} image
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ steps.login.outputs.registry }}/${{ env.PROD_IMAGE }}
+          image-ref: ${{ steps.login.outputs.registry }}/${{ env.LATEST_PROD_IMAGE }}
           ignore-unfixed: true
           format: 'sarif'
           output: 'trivy-results.sarif'

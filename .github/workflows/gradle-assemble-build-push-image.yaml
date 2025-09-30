@@ -23,6 +23,11 @@ on:
         type: string
         description: Path to the Dockerfile
         default: 'Dockerfile'
+      image-tag:
+        required: false
+        type: string
+        description: Docker image tag
+        default: 'latest'
       image-suffix:
         required: false
         type: string
@@ -62,6 +67,7 @@ jobs:
           dockerfile: ${{ inputs.dockerfile }}
           docker_context: ${{ inputs.docker-context }}
           image_suffix: ${{ inputs.image-suffix }}
+          tag: ${{ inputs.image-tag }}
 
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
