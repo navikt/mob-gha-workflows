@@ -1,4 +1,4 @@
-name: Build & Push Docker Image
+name: Build application & build/push image
 
 on:
   workflow_call:
@@ -36,10 +36,10 @@ on:
     outputs:
       image:
         description: Google Artifact Registery image
-        value: ${{ jobs.build-push-image.outputs.image }}
+        value: ${{ jobs.build-application-build-push-image.outputs.image }}
 
 jobs:
-  build-push-image:
+  build-application-build-push-image:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

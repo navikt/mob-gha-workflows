@@ -1,4 +1,4 @@
-name: Build & Push Docker Image
+name: Assemble application & build/push image
 
 on:
   workflow_call:
@@ -12,19 +12,29 @@ on:
         required: false
         type: string
         description: Gradle task to run
-        default: './gradlew --configuration-cache build shadowJar'
-      image-tag:
+        default: './gradlew installDist --configuration-cache'
+      docker-context:
         required: false
         type: string
-        description: Docker image tag
-        default: 'latest'
+        description: Path to the Docker build context
+        default: '.'
+      dockerfile:
+        required: false
+        type: string
+        description: Path to the Dockerfile
+        default: 'Dockerfile'
+      image-suffix:
+        required: false
+        type: string
+        description: Suffix to append to the image tag
+        default: ''
     outputs:
       image:
-        description: Google Artifact Registery image
-        value: ${{ jobs.build-push-image.outputs.image }}
+        description: Google Artifact Registry image
+        value: ${{ jobs.assemble-application-build-push-image.outputs.image }}
 
 jobs:
-  build-push-image:
+  assemble-application-build-push-image:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -36,7 +46,7 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ inputs.java-version }}
 
-      - name: Build and test application
+      - name: Build application
         uses: gradle/actions/setup-gradle@v4
         env: # Eksluder test dependencies
           DEPENDENCY_GRAPH_INCLUDE_CONFIGURATIONS: compileClasspath|runtimeClasspath
@@ -49,6 +59,9 @@ jobs:
         id: docker-build-push
         with:
           team: okonomi
-          tag: ${{ inputs.image-tag }}
+          dockerfile: ${{ inputs.dockerfile }}
+          docker_context: ${{ inputs.docker-context }}
+          image_suffix: ${{ inputs.image-suffix }}
+
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}

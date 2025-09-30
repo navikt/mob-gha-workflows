@@ -1,4 +1,4 @@
-name: NAIS Alerts Deploy
+name: Deploy application
 
 on:
   workflow_call:
@@ -11,19 +11,24 @@ on:
         required: true
         type: string
         description: NAIS resource to use for deployment
+      image:
+        required: true
+        type: string
+        description: Docker image to deploy
 
 jobs:
-  deploy:
+  deploy-application:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
-          
+
       - name: Deploy to Environment
         uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: ${{ inputs.cluster }}
           RESOURCE: ${{ inputs.resource }}
+          IMAGE: ${{ inputs.image }}
           TIMEOUT: 10m
           PRINT_PAYLOAD: true

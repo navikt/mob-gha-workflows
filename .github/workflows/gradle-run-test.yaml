@@ -1,4 +1,4 @@
-name: Build & test PR
+name: Run application tests
 
 on:
   workflow_call:
@@ -12,10 +12,10 @@ on:
         required: false
         type: string
         description: Gradle task to run
-        default: './gradlew --configuration-cache build shadowJar'
+        default: './gradlew test --configuration-cache'
 
 jobs:
-  build-pr:
+  run-application-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
