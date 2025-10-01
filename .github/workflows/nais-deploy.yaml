@@ -32,3 +32,30 @@ jobs:
           IMAGE: ${{ inputs.image }}
           TIMEOUT: 10m
           PRINT_PAYLOAD: true
+
+      - name: Find and Comment on PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ job.status }}';
+            const emoji = status === 'success' ? '🚀' : '❌';
+            const message = status === 'success' 
+              ? `${emoji} Successfully deployed to **${{ inputs.cluster }}**`
+              : `${emoji} Deployment to **${{ inputs.cluster }}** failed`;
+            
+            const { data: pullRequests } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha
+            });
+            
+            if (pullRequests.length > 0) {
+              const pr = pullRequests[0];
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: `${message}\nImage: \`${{ inputs.image }}\``
+              });
+            }    
