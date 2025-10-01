@@ -23,10 +23,26 @@ jobs:
       contents: read
       id-token: write
       pull-requests: write
+      deployments: write
     steps:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
+
+      - name: Create GitHub Deployment
+        id: deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deployment = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.ref,
+              environment: '${{ inputs.cluster }}',
+              auto_merge: false,
+              required_contexts: []
+            });
+            return deployment.data.id;    
 
       - name: Deploy to Environment
         uses: nais/deploy/actions/deploy@v2
@@ -36,6 +52,20 @@ jobs:
           IMAGE: ${{ inputs.image }}
           TIMEOUT: 10m
           PRINT_PAYLOAD: true
+
+      - name: Update Deployment Status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const state = '${{ job.status }}' === 'success' ? 'success' : 'failure';
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: ${{ steps.deployment.outputs.result }},
+              state: state,
+              log_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            });    
 
       - name: Find and Comment on PR
         if: always()
@@ -63,3 +93,96 @@ jobs:
                 body: `${message}\nImage: \`${{ inputs.image }}\``
               });
             }    
+
+## Alternativ ved bruk av tredjeparts action for å oppdatere github deployment status
+
+#name: Deploy application
+#
+#on:
+#  workflow_call:
+#    inputs:
+#      cluster:
+#        required: true
+#        type: string
+#        description: NAIS cluster to deploy to
+#      resource:
+#        required: true
+#        type: string
+#        description: NAIS resource to use for deployment
+#      image:
+#        required: true
+#        type: string
+#        description: Docker image to deploy
+#
+#jobs:
+#  deploy-application:
+#    runs-on: ubuntu-latest
+#    permissions:
+#      contents: read
+#      id-token: write
+#      pull-requests: write
+#      deployments: write
+#    steps:
+#      - uses: actions/checkout@v5
+#        with:
+#          persist-credentials: false
+#
+#      - name: Create GitHub Deployment
+#        uses: chrnorm/deployment-action@v2
+#        id: deployment
+#        with:
+#          token: ${{ github.token }}
+#          environment: ${{ inputs.cluster }}
+#
+#      - name: Deploy to Environment
+#        id: deploy
+#        uses: nais/deploy/actions/deploy@v2
+#        env:
+#          CLUSTER: ${{ inputs.cluster }}
+#          RESOURCE: ${{ inputs.resource }}
+#          IMAGE: ${{ inputs.image }}
+#          TIMEOUT: 10m
+#          PRINT_PAYLOAD: true
+#
+#      - name: Update Deployment Status (Success)
+#        if: success()
+#        uses: chrnorm/deployment-status@v2
+#        with:
+#          token: ${{ github.token }}
+#          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+#          state: success
+#
+#      - name: Update Deployment Status (Failure)
+#        if: failure()
+#        uses: chrnorm/deployment-status@v2
+#        with:
+#          token: ${{ github.token }}
+#          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+#          state: failure
+#
+#      - name: Find and Comment on PR
+#        if: always()
+#        uses: actions/github-script@v7
+#        with:
+#          script: |
+#            const status = '${{ job.status }}';
+#            const emoji = status === 'success' ? '🚀' : '❌';
+#            const message = status === 'success' 
+#              ? `${emoji} Successfully deployed to **${{ inputs.cluster }}**`
+#              : `${emoji} Deployment to **${{ inputs.cluster }}** failed`;
+#            
+#            const { data: pullRequests } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+#              owner: context.repo.owner,
+#              repo: context.repo.repo,
+#              commit_sha: context.sha
+#            });
+#            
+#            if (pullRequests.length > 0) {
+#              const pr = pullRequests[0];
+#              await github.rest.issues.createComment({
+#                owner: context.repo.owner,
+#                repo: context.repo.repo,
+#                issue_number: pr.number,
+#                body: `${message}\nImage: \`${{ inputs.image }}\``
+#              });
+#            }
