@@ -28,28 +28,28 @@ jobs:
           - language: ${{ inputs.language }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # ratchet:actions/checkout@v5
         with:
           persist-credentials: false
 
-      - uses: github/codeql-action/init@v3
+      - uses: github/codeql-action/init@3599b3baa15b485a2e49ef411a7a4bb2452e7f93 # ratchet:github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
-      - uses: github/codeql-action/autobuild@v3
+      - uses: github/codeql-action/autobuild@3599b3baa15b485a2e49ef411a7a4bb2452e7f93 # ratchet:github/codeql-action/autobuild@v3
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@3599b3baa15b485a2e49ef411a7a4bb2452e7f93 # ratchet:github/codeql-action/analyze@v3
         with:
           category: "/language:${{ matrix.language }}"
 
       - name: Login to Google Artifact Registry
-        uses: nais/login@v0
+        uses: nais/login@e7cf2c159677dc7c7d599feff5f808f2bf59c7cf # ratchet:nais/login@v0
         id: login
         with:
           team: okonomi
-          
+
       - name: Perform Trivy vulnerability scan on ${{ env.LATEST_PROD_IMAGE }} image
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # ratchet:aquasecurity/trivy-action@master
         with:
           image-ref: ${{ steps.login.outputs.registry }}/${{ env.LATEST_PROD_IMAGE }}
           ignore-unfixed: true
@@ -58,7 +58,7 @@ jobs:
           severity: 'HIGH,CRITICAL'
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@3599b3baa15b485a2e49ef411a7a4bb2452e7f93 # ratchet:github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'

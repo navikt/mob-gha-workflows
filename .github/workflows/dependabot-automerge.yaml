@@ -26,12 +26,12 @@ on:
         description: 'Whether to automatically approve PRs before merging them'
         required: false
         type: boolean
-        default: true 
+        default: true
       merge-method:
         description: 'The merge method to use when merging pull requests (merge, squash, rebase)'
         required: false
         type: string
-        default: 'squash'   
+        default: 'squash'
   workflow_dispatch:
 
 jobs:
@@ -46,7 +46,7 @@ jobs:
     steps:
       - name: Automerge Dependabot PRs
         id: automerge
-        uses: navikt/automerge-dependabot@main
+        uses: navikt/automerge-dependabot@1a178fef2e3864de14dd285faa8b28afcdf9efcf # ratchet:navikt/automerge-dependabot@main
         with:
           token: ${{ github.token }}
           minimum-age-of-pr: ${{ inputs.minimum-age-of-pr }}
