@@ -22,7 +22,7 @@ on:
         required: false
         type: string
         description: Command to build the server
-        default: 'cd server && pnpm run build'
+        default: 'pnpm run build'
       client-build-command:
         required: false
         type: string
