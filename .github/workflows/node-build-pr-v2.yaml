@@ -47,4 +47,6 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
       - name: Build app
-        run: ${{ inputs.build-command }}
+        run: $BUILD_COMMAND
+        env:
+          BUILD_COMMAND: ${{ inputs.build-command }}

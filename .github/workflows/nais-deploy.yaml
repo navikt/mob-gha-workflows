@@ -32,8 +32,20 @@ jobs:
       - name: Create GitHub Deployment
         id: deployment
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # ratchet:actions/github-script@v7
+        env:
+          CLUSTER_NAME: ${{ inputs.cluster }}
         with:
-          script: "const deployment = await github.rest.repos.createDeployment({\n  owner: context.repo.owner,\n  repo: context.repo.repo,\n  ref: context.ref,\n  environment: '${{ inputs.cluster }}',\n  auto_merge: false,\n  required_contexts: []\n});\nreturn deployment.data.id;    \n"
+          script: |
+            const deployment = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.ref,
+              environment: process.env.CLUSTER_NAME,
+              auto_merge: false,
+              required_contexts: []
+            });
+            return deployment.data.id;
+
       - name: Deploy to Environment
         uses: nais/deploy/actions/deploy@961addd1e4d4211f1a7333ada5fde85f7c9aa5b7 # ratchet:nais/deploy/actions/deploy@v2
         env:
@@ -42,53 +54,52 @@ jobs:
           IMAGE: ${{ inputs.image }}
           TIMEOUT: 10m
           PRINT_PAYLOAD: true
-      - name: Update Deployment Status
 
+      - name: Update Deployment Status
         if: always()
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # ratchet:actions/github-script@v7
+        env:
+          JOB_STATUS: ${{ job.status }}
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.result }}
         with:
-          script: "const state = '${{ job.status }}' === 'success' ? 'success' : 'failure';\nawait github.rest.repos.createDeploymentStatus({\n  owner: context.repo.owner,\n  repo: context.repo.repo,\n  deployment_id: ${{ steps.deployment.outputs.result }},\n  state: state,\n  log_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`\n});    \n"
+          script: |
+            const state = process.env.JOB_STATUS === 'success' ? 'success' : 'failure';
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: process.env.DEPLOYMENT_ID,
+              state: state,
+              log_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            });
+
       - name: Find and Comment on PR
         if: always()
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # ratchet:actions/github-script@v7
+        env:
+          JOB_STATUS: ${{ job.status }}
+          CLUSTER_NAME: ${{ inputs.cluster }}
+          IMAGE_NAME: ${{ inputs.image }}
+          TRIGGERING_ACTOR: ${{ github.triggering_actor }}
         with:
+          script: |
+            const status = process.env.JOB_STATUS;
+            const emoji = status === 'success' ? '🚀' : '❌';
+            const message = status === 'success'
+              ? `${emoji} Successfully deployed to **${process.env.CLUSTER_NAME}**`
+              : `${emoji} Deployment to **${process.env.CLUSTER_NAME}** failed`;
 
-          script: "const status = '${{ job.status }}';\nconst emoji = status === 'success' ? '🚀' : '❌';\nconst message = status === 'success' \n  ? `${emoji} Successfully deployed to **${{ inputs.cluster }}**`\n  : `${emoji} Deployment to **${{ inputs.cluster }}** failed`;\n\nconst { data: pullRequests } = await github.rest.repos.listPullRequestsAssociatedWithCommit({\n  owner: context.repo.owner,\n  repo: context.repo.repo,\n  commit_sha: context.sha\n});\n\nif (pullRequests.length > 0) {\n  const pr = pullRequests[0];\n  await github.rest.issues.createComment({\n    owner: context.repo.owner,\n    repo: context.repo.repo,\n    issue_number: pr.number,\n    body: `${message}\\n📦 Image: \\`${{ inputs.image }}\\`\\n👷 Deployed by: @${{ github.triggering_actor }}`\n  });\n}    "
+            const { data: pullRequests } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha
+            });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            if (pullRequests.length > 0) {
+              const pr = pullRequests[0];
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: `${message}\n📦 Image: \`${process.env.IMAGE_NAME}\`\n👷 Deployed by: @${process.env.TRIGGERING_ACTOR}`
+              });
+            }

@@ -60,8 +60,11 @@ jobs:
       - name: Automerge results
         run: |
           echo "Automerge Results:"
-          echo "Number of merged PRs: ${{ steps.automerge.outputs.merged-pr-count }}"
-          echo "Will trigger deploy: ${{ steps.automerge.outputs.merged-pr-count != '0' }}"
+          echo "Number of merged PRs: $MERGED_PR_COUNT"
+          echo "Will trigger deploy: $WILL_TRIGGER_DEPLOY"
+        env:
+          MERGED_PR_COUNT: ${{ steps.automerge.outputs.merged-pr-count }}
+          WILL_TRIGGER_DEPLOY: ${{ steps.automerge.outputs.merged-pr-count != '0' }}
 
       - name: Run deploy workflow
         if: steps.automerge.outputs.merged-pr-count != '0'
