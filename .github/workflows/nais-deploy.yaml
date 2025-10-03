@@ -81,7 +81,7 @@ jobs:
           IMAGE_NAME: ${{ inputs.image }}
           TRIGGERING_ACTOR: ${{ github.triggering_actor }}
         with:
-          script: |
+          script: |-
             const status = process.env.JOB_STATUS;
             const emoji = status === 'success' ? '🚀' : '❌';
             const message = status === 'success'
