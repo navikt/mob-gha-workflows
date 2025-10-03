@@ -82,9 +82,7 @@ jobs:
 
       - name: Build server
         working-directory: ${{ inputs.server-directory }}
-        run: $SERVER_BUILD_COMMAND
-        env:
-          SERVER_BUILD_COMMAND: ${{ inputs.server-build-command }}
+        run: ${{ inputs.server-build-command }}
 
       - name: Build app
         run: $CLIENT_BUILD_COMMAND
