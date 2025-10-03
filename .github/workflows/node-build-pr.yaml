@@ -13,6 +13,11 @@ on:
         type: string
         description: pnpm version to build with
         default: '10'
+      server-directory:
+        required: false
+        type: string
+        description: Server directory path
+        default: 'server'
       server-build-command:
         required: false
         type: string
@@ -52,8 +57,8 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
       - name: Install dependencies for server
+        working-directory: ${{ inputs.server-directory }}
         run: |
-          cd server
           pnpm config set //npm.pkg.github.com/:_authToken $NODE_AUTH_TOKEN
           pnpm config set engine-strict true
           pnpm config set @navikt:registry https://npm.pkg.github.com
@@ -62,6 +67,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
       - name: Build server
+        working-directory: ${{ inputs.server-directory }}
         run: $SERVER_BUILD_COMMAND
         env:
           SERVER_BUILD_COMMAND: ${{ inputs.server-build-command }}
