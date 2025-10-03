@@ -87,9 +87,7 @@ jobs:
           SERVER_BUILD_COMMAND: ${{ inputs.server-build-command }}
 
       - name: Build app
-        run: $CLIENT_BUILD_COMMAND
-        env:
-          CLIENT_BUILD_COMMAND: ${{ inputs.client-build-command }}
+        run: ${{ inputs.client-build-command }}
 
       - name: Push Docker Image to GAR
         uses: nais/docker-build-push@791ebb6f74b82849c742a9bc9c97abe44c6c111f # ratchet:nais/docker-build-push@v0
