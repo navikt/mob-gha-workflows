@@ -1,10 +1,9 @@
-name: Zizmor Security Analysis
+name: zizmor Schedule Scan
 
 on:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["**"]
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
 
 permissions:
     security-events: write
@@ -20,12 +19,12 @@ jobs:
 
       - uses: astral-sh/setup-uv@b75a909f75acd358c2196fb9a5f1299a9a8868a4 # v6.7.0
 
-      - name: Run zizmor security analysis
+      - name: Perform zizmor analysis
         run: uvx zizmor --format=sarif . > results.sarif
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload SARIF file
+      - name: Upload zizmor analysis results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@192325c86100d080feab897ff886c34abd4c83a3 # v3.30.3
         with:
           sarif_file: results.sarif
