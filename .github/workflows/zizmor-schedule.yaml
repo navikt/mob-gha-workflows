@@ -9,7 +9,7 @@ permissions:
     security-events: write
 
 jobs:
-  zizmor-security-analysis:
+  zizmor-scan:
     runs-on: ubuntu-latest
     steps:
 
