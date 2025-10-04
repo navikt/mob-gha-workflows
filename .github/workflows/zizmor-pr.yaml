@@ -1,0 +1,43 @@
+name: zizmor PR Scan
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  zizmor-scan:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@b75a909f75acd358c2196fb9a5f1299a9a8868a4 # v6.7.0
+
+      - name: Run zizmor security analysis
+        run: |
+          echo "Running zizmor security analysis..."
+
+          # Run zizmor and capture exit code
+          if uvx zizmor .; then
+            echo "✅ Zizmor analysis completed successfully - no security issues found!"
+          else
+            exit_code=$?
+            echo "❌ Zizmor analysis failed with exit code: $exit_code"
+            case $exit_code in
+              11) echo "🔵 Informational level security findings detected" ;;
+              12) echo "🟡 Low level security findings detected" ;;
+              13) echo "🟠 Medium level security findings detected" ;;
+              14) echo "🔴 High level security findings detected" ;;
+              *) echo "⚠️  Unknown error occurred during analysis" ;;
+            esac
+            echo "Please review the output above and fix the security issues before merging this PR."
+            exit $exit_code
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
