@@ -1,0 +1,35 @@
+name: Squawk Migrations Lint
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        required: false
+        type: string
+        description: Node version to run tests with
+        default: '22'
+      pnpm-version:
+        required: false
+        type: string
+        description: Pnpm version to run tests with
+        default: '10'
+
+jobs:
+  squawk-migrations-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # ratchet:actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Find modified migrations
+        run: |
+          modified_migrations=$(git diff --diff-filter=d --name-only origin/$GITHUB_BASE_REF...origin/$GITHUB_HEAD_REF 'src/main/resources/db/migration/*.sql' | tr '\n' ' ')
+          echo "Migration files: $modified_migrations"
+          echo "file_names=$modified_migrations" >> $GITHUB_OUTPUT
+        id: modified-migrations
+
+      - uses: sbdchd/squawk-action@68d739e098ab69cf46c64fdbf6175bb29d195a16 # ratchet:sbdchd/squawk-action@v2
+        with:
+          files: ${{ steps.modified-migrations.outputs.file_names }}
