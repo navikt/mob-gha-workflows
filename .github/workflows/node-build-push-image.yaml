@@ -38,6 +38,11 @@ on:
         type: string
         description: Suffix to append to the image tag
         default: ''
+    secrets:
+      ASTRO_KEY:
+        required: false
+        description: Optional Astro key
+
     outputs:
       image:
         description: Google Artifact Registery image
@@ -71,6 +76,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
       - name: Install dependencies for server
+        if: ${{ ! cancelled() && hashFiles('server/package.json') != '' }}
         working-directory: ${{ inputs.server-directory }}
         run: |
           pnpm config set //npm.pkg.github.com/:_authToken $NODE_AUTH_TOKEN
@@ -81,16 +87,26 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
       - name: Build server
+        if: ${{ ! cancelled() && hashFiles('server/package.json') != '' }}
         working-directory: ${{ inputs.server-directory }}
         run: $SERVER_BUILD_COMMAND
         env:
           SERVER_BUILD_COMMAND: ${{ inputs.server-build-command }}
 
-      - name: Build app
+      - name: Build app (with Astro)
+        if: ${{ env.ASTRO_KEY != '' }}
         run: $CLIENT_BUILD_COMMAND
         env:
           CLIENT_BUILD_COMMAND: ${{ inputs.client-build-command }}
+          ASTRO_KEY: ${{ secrets.ASTRO_KEY }}
 
+      - name: Build app (without Astro)
+        if: ${{ env.ASTRO_KEY == '' }}
+        run: $CLIENT_BUILD_COMMAND
+        env:
+          CLIENT_BUILD_COMMAND: ${{ inputs.client-build-command }}
+          ASTRO_KEY: ${{ secrets.ASTRO_KEY }}
+          
       - name: Push Docker Image to GAR
         uses: nais/docker-build-push@791ebb6f74b82849c742a9bc9c97abe44c6c111f # ratchet:nais/docker-build-push@v0
         id: docker-build-push

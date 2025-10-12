@@ -57,6 +57,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
       - name: Install dependencies for server
+        if: ${{ ! cancelled() && hashFiles('server/package.json') != '' }}
         working-directory: ${{ inputs.server-directory }}
         run: |
           pnpm config set //npm.pkg.github.com/:_authToken $NODE_AUTH_TOKEN
@@ -67,6 +68,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
       - name: Build server
+        if: ${{ ! cancelled() && hashFiles('server/package.json') != '' }}
         working-directory: ${{ inputs.server-directory }}
         run: $SERVER_BUILD_COMMAND
         env:
