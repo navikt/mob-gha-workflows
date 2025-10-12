@@ -23,10 +23,10 @@ on:
         type: string
         description: Command to build the server
         default: 'pnpm run build'
-      client-build-command:
+      app-build-command:
         required: false
         type: string
-        description: Command to build the client
+        description: Command to build the app
         default: 'pnpm run build'
       image-tag:
         required: false
@@ -95,18 +95,18 @@ jobs:
 
       - name: Build app (with Astro)
         if: ${{ env.ASTRO_KEY != '' }}
-        run: $CLIENT_BUILD_COMMAND
+        run: $APP_BUILD_COMMAND
         env:
-          CLIENT_BUILD_COMMAND: ${{ inputs.client-build-command }}
+          APP_BUILD_COMMAND: ${{ inputs.app-build-command }}
           ASTRO_KEY: ${{ secrets.ASTRO_KEY }}
 
       - name: Build app (without Astro)
         if: ${{ env.ASTRO_KEY == '' }}
-        run: $CLIENT_BUILD_COMMAND
+        run: $APP_BUILD_COMMAND
         env:
-          CLIENT_BUILD_COMMAND: ${{ inputs.client-build-command }}
+          APP_BUILD_COMMAND: ${{ inputs.app-build-command }}
           ASTRO_KEY: ${{ secrets.ASTRO_KEY }}
-          
+
       - name: Push Docker Image to GAR
         uses: nais/docker-build-push@791ebb6f74b82849c742a9bc9c97abe44c6c111f # ratchet:nais/docker-build-push@v0
         id: docker-build-push
