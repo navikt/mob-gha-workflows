@@ -23,10 +23,10 @@ on:
         type: string
         description: Command to build the server
         default: 'pnpm run build'
-      client-build-command:
+      app-build-command:
         required: false
         type: string
-        description: Command to build the client
+        description: Command to build the app
         default: 'pnpm run build'
 
 jobs:
@@ -57,6 +57,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
       - name: Install dependencies for server
+        if: ${{ ! cancelled() && hashFiles('server/package.json') != '' }}
         working-directory: ${{ inputs.server-directory }}
         run: |
           pnpm config set //npm.pkg.github.com/:_authToken $NODE_AUTH_TOKEN
@@ -67,12 +68,13 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
       - name: Build server
+        if: ${{ ! cancelled() && hashFiles('server/package.json') != '' }}
         working-directory: ${{ inputs.server-directory }}
         run: $SERVER_BUILD_COMMAND
         env:
           SERVER_BUILD_COMMAND: ${{ inputs.server-build-command }}
 
-      - name: Build client
-        run: $CLIENT_BUILD_COMMAND
+      - name: Build app
+        run: $APP_BUILD_COMMAND
         env:
-          CLIENT_BUILD_COMMAND: ${{ inputs.client-build-command }}
+          APP_BUILD_COMMAND: ${{ inputs.app-build-command }}
