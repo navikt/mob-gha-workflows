@@ -46,7 +46,7 @@ jobs:
     steps:
       - name: Automerge Dependabot PRs
         id: automerge
-        uses: navikt/automerge-dependabot@1a178fef2e3864de14dd285faa8b28afcdf9efcf # ratchet:navikt/automerge-dependabot@main
+        uses: navikt/automerge-dependabot@839749048f14dd9b55f9c042e853e2aa8a8a1390 # ratchet:navikt/automerge-dependabot@main
         with:
           token: ${{ github.token }}
           minimum-age-of-pr: ${{ inputs.minimum-age-of-pr }}
