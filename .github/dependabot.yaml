@@ -1,5 +1,6 @@
 version: 2
 updates:
+  # zizmor: ignore[dependabot-cooldown]
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
