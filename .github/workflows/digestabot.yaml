@@ -2,11 +2,6 @@ name: Digestabot Check
 
 on:
   workflow_call:
-    inputs:
-      team:
-        description: 'Team name for digestabot'
-        required: true
-        type: string
 
 jobs:
   digest-update:
@@ -22,4 +17,4 @@ jobs:
       - uses: navikt/digestabot@07cb8ac331b0b06bc0b30a7415587fb63b919608 # ratchet:navikt/digestabot@v1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          team: ${{ inputs.team }}
+          team: okonomi
