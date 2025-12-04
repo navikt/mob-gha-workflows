@@ -26,3 +26,5 @@ jobs:
         env:
           CLUSTER: ${{ inputs.cluster }}
           RESOURCE: ${{ inputs.resource }}
+          TIMEOUT: 10m
+          PRINT_PAYLOAD: true
