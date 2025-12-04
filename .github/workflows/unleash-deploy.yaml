@@ -1,0 +1,28 @@
+name: Deploy Unleash
+
+on:
+  workflow_call:
+    inputs:
+      resource:
+        required: true
+        type: string
+        description: Unleash resource to use for deployment
+      cluster:
+        required: false
+        type: string
+        description: NAIS cluster to deploy to
+
+jobs:
+  deploy-unleash:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # ratchet:actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: nais/deploy/actions/deploy@56e14061f2a8437bd9119e7b8f92749a3b288db1 # ratchet:nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: ${{ inputs.cluster }}
+          RESOURCE: ${{ inputs.resource }}
