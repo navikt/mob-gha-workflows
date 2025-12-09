@@ -12,7 +12,7 @@ on:
         required: false
         type: string
         description: Node version to build with
-        default: '22'
+        default: '24'
       server-directory:
         required: false
         type: string
