@@ -11,7 +11,7 @@ jobs:
       pull-requests: write
       id-token: write
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # ratchet:actions/checkout@v5
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # ratchet:actions/checkout@v6
         with:
           persist-credentials: false
       - uses: navikt/digestabot@6c419f9c92ce6a841d25d44e1f91ae8d371ecdd3 # ratchet:navikt/digestabot@v1.1
