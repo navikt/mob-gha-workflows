@@ -7,37 +7,37 @@ on:
         required: false
         type: string
         description: pnpm version to build with
-        default: '10'
+        default: "10"
       node-version:
         required: false
         type: string
         description: Node version to build with
-        default: '24'
+        default: "24"
       server-directory:
         required: false
         type: string
         description: Server directory path
-        default: 'server'
+        default: "server"
       server-build-command:
         required: false
         type: string
         description: Command to build the server
-        default: 'pnpm run build'
+        default: "pnpm run build"
       app-build-command:
         required: false
         type: string
         description: Command to build the app
-        default: 'pnpm run build'
+        default: "pnpm run build"
       image-tag:
         required: false
         type: string
         description: Docker image tag
-        default: 'latest'
+        default: "latest"
       image-suffix:
         required: false
         type: string
         description: Suffix to append to the image tag
-        default: ''
+        default: ""
     secrets:
       ASTRO_KEY:
         required: false
@@ -52,6 +52,11 @@ jobs:
   build-application-build-push-image:
     runs-on: ubuntu-latest
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # ratchet:step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # ratchet:actions/checkout@v6
         with:
           persist-credentials: false
@@ -64,7 +69,7 @@ jobs:
       - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # ratchet:actions/setup-node@v6
         with:
           node-version: ${{ inputs.node-version }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies for client
         run: |
@@ -114,6 +119,6 @@ jobs:
           team: okonomi
           image_suffix: ${{ inputs.image-suffix }}
           tag: ${{ inputs.image-tag }}
-          
+
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}

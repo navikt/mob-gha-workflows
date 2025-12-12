@@ -7,24 +7,29 @@ on:
         required: false
         type: string
         description: Java version to build with
-        default: '21'
+        default: "21"
       gradle-task:
         required: false
         type: string
         description: Gradle task to run
-        default: './gradlew test --configuration-cache'
+        default: "./gradlew test --configuration-cache"
 
 jobs:
   run-application-tests:
     runs-on: ubuntu-latest
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # ratchet:step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # ratchet:actions/checkout@v6
         with:
           persist-credentials: false
 
       - uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # ratchet:actions/setup-java@v5
         with:
-          distribution: 'temurin'
+          distribution: "temurin"
           java-version: ${{ inputs.java-version }}
 
       - uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # ratchet:gradle/actions/setup-gradle@v5
