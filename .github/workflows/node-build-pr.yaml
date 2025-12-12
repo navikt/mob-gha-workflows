@@ -78,3 +78,11 @@ jobs:
         run: $APP_BUILD_COMMAND
         env:
           APP_BUILD_COMMAND: ${{ inputs.app-build-command }}
+
+      - name: Run Vitest (if configured)
+        run: |
+          if grep -q '"vitest":' package.json; then
+            pnpm vitest run
+          else
+            echo "Vitest not found in package.json, skipping tests"
+          fi
