@@ -28,6 +28,11 @@ on:
         type: string
         description: Command to build the app
         default: "pnpm run build"
+      vitest-command:
+        required: false
+        type: string
+        description: Command to run Vitest tests
+        default: "pnpm vitest"  
 
 jobs:
   build-test-pr:
@@ -87,7 +92,9 @@ jobs:
       - name: Run Vitest (if configured)
         run: |
           if grep -q '"vitest":' package.json; then
-            pnpm vitest run
+            $VITEST_COMMAND
           else
             echo "Vitest not found in package.json, skipping tests"
           fi
+        env:
+          VITEST_COMMAND: ${{ inputs.vitest-command }}
