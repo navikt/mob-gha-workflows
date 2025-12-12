@@ -7,18 +7,23 @@ on:
         required: false
         type: string
         description: Node version to run tests with
-        default: '24'
+        default: "24"
       pnpm-version:
         required: false
         type: string
         description: Pnpm version to run tests with
-        default: '10'
+        default: "10"
 
 jobs:
   playwright-tests:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # ratchet:step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # ratchet:actions/checkout@v6
         with:
           persist-credentials: false
@@ -31,7 +36,7 @@ jobs:
       - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # ratchet:actions/setup-node@v6
         with:
           node-version: ${{ inputs.node-version }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies for client
         run: |

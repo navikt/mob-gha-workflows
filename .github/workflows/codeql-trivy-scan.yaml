@@ -6,12 +6,12 @@ on:
       language:
         required: true
         type: string
-        description: 'Programming language to analyze (eg: java or javascript)'
+        description: "Programming language to analyze (eg: java or javascript)"
       image-suffix:
         required: false
         type: string
-        default: ''
-        description: 'Optional suffix to append to the image name (no leading dash).'
+        default: ""
+        description: "Optional suffix to append to the image name (no leading dash)."
 
 env:
   LATEST_PROD_IMAGE: ${{ format('{0}{1}:latest', github.event.repository.name, inputs.image-suffix != '' && format('-{0}', inputs.image-suffix) || '') }}
@@ -28,6 +28,11 @@ jobs:
           - language: ${{ inputs.language }}
 
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # ratchet:step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # ratchet:actions/checkout@v6
         with:
           persist-credentials: false
@@ -35,6 +40,7 @@ jobs:
       - uses: github/codeql-action/init@0499de31b99561a6d14a36a5f662c2a54f91beee # ratchet:github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
+          queries: security-extended,security-and-quality
       - uses: github/codeql-action/autobuild@0499de31b99561a6d14a36a5f662c2a54f91beee # ratchet:github/codeql-action/autobuild@v3
 
       - name: Perform CodeQL Analysis
@@ -53,13 +59,13 @@ jobs:
         with:
           image-ref: ${{ steps.login.outputs.registry }}/${{ env.LATEST_PROD_IMAGE }}
           ignore-unfixed: true
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'HIGH,CRITICAL'
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "HIGH,CRITICAL"
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@0499de31b99561a6d14a36a5f662c2a54f91beee # ratchet:github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
-          category: 'trivy'
+          sarif_file: "trivy-results.sarif"
+          category: "trivy"

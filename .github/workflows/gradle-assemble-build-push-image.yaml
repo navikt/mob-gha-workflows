@@ -7,32 +7,32 @@ on:
         required: false
         type: string
         description: Java version to build with
-        default: '21'
+        default: "21"
       gradle-task:
         required: false
         type: string
         description: Gradle task to run
-        default: './gradlew installDist --configuration-cache'
+        default: "./gradlew installDist --configuration-cache"
       docker-context:
         required: false
         type: string
         description: Path to the Docker build context
-        default: '.'
+        default: "."
       dockerfile:
         required: false
         type: string
         description: Path to the Dockerfile
-        default: 'Dockerfile'
+        default: "Dockerfile"
       image-tag:
         required: false
         type: string
         description: Docker image tag
-        default: 'latest'
+        default: "latest"
       image-suffix:
         required: false
         type: string
         description: Suffix to append to the image tag
-        default: ''
+        default: ""
     outputs:
       image:
         description: Google Artifact Registry image
@@ -42,13 +42,18 @@ jobs:
   assemble-application-build-push-image:
     runs-on: ubuntu-latest
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # ratchet:step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # ratchet:actions/checkout@v6
         with:
           persist-credentials: false
 
       - uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # ratchet:actions/setup-java@v5
         with:
-          distribution: 'temurin'
+          distribution: "temurin"
           java-version: ${{ inputs.java-version }}
 
       - name: Build application
