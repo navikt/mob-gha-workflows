@@ -92,7 +92,11 @@ jobs:
       - name: Run Vitest (if configured)
         run: |
           if grep -q '"vitest":' package.json; then
-            $VITEST_COMMAND
+            if find . -name '*.test.*' -o -name '*.spec.*' | grep -q .; then
+              $VITEST_COMMAND
+            else
+              echo "No test files found, skipping Vitest"
+            fi
           else
             echo "Vitest not found in package.json, skipping tests"
           fi
