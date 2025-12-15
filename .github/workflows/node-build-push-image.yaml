@@ -38,6 +38,11 @@ on:
         type: string
         description: Suffix to append to the image tag
         default: ""
+      vitest-command:
+        required: false
+        type: string
+        description: Command to run Vitest tests
+        default: "pnpm run vitest"    
     secrets:
       ASTRO_KEY:
         required: false
@@ -111,6 +116,16 @@ jobs:
         env:
           APP_BUILD_COMMAND: ${{ inputs.app-build-command }}
           ASTRO_KEY: ${{ secrets.ASTRO_KEY }}
+
+      - name: Run Vitest (if configured)
+        run: |
+          if grep -q '"vitest".*:' package.json; then
+            $VITEST_COMMAND
+          else
+            echo "Vitest script not found in package.json, skipping tests"
+          fi
+        env:
+          VITEST_COMMAND: ${{ inputs.vitest-command }}    
 
       - name: Push Docker Image to GAR
         uses: nais/docker-build-push@791ebb6f74b82849c742a9bc9c97abe44c6c111f # ratchet:nais/docker-build-push@v0

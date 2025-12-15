@@ -32,7 +32,7 @@ on:
         required: false
         type: string
         description: Command to run Vitest tests
-        default: "pnpm vitest"  
+        default: "pnpm run vitest"  
 
 jobs:
   build-test-pr:

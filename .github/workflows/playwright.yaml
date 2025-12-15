@@ -13,6 +13,11 @@ on:
         type: string
         description: Pnpm version to run tests with
         default: "10"
+      playwright-command:
+        required: false
+        type: string
+        description: Command to run Playwright tests
+        default: "pnpm run playwright"     
 
 jobs:
   playwright-tests:
@@ -51,7 +56,9 @@ jobs:
         run: pnpm exec playwright install --with-deps
 
       - name: Run Playwright tests (including accessibility)
-        run: pnpm exec playwright test playwright-tests
+        run: $PLAYWRIGHT_COMMAND
+        env:
+          PLAYWRIGHT_COMMAND: ${{ inputs.playwright-command }} 
 
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # ratchet:actions/upload-artifact@v5
         if: ${{ !cancelled() }}
