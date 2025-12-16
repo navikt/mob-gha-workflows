@@ -42,7 +42,7 @@ on:
         required: false
         type: string
         description: Command to run Vitest tests
-        default: "pnpm run vitest"    
+        default: "pnpm run vitest"
     secrets:
       ASTRO_KEY:
         required: false
@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # ratchet:step-security/harden-runner@v2
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # ratchet:step-security/harden-runner@v2
         with:
           egress-policy: audit
 
@@ -125,7 +125,7 @@ jobs:
             echo "Vitest script not found in package.json, skipping tests"
           fi
         env:
-          VITEST_COMMAND: ${{ inputs.vitest-command }}    
+          VITEST_COMMAND: ${{ inputs.vitest-command }}
 
       - name: Push Docker Image to GAR
         uses: nais/docker-build-push@791ebb6f74b82849c742a9bc9c97abe44c6c111f # ratchet:nais/docker-build-push@v0

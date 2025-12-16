@@ -8,8 +8,8 @@ updates:
       time: "08:00"
       timezone: "Europe/Oslo"
     cooldown:
-      default-days: 7  
-    open-pull-requests-limit: 10  
+      default-days: 7
+    open-pull-requests-limit: 10
     groups:
       github:
         patterns:

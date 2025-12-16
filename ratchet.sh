@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FILES=$(find .github -type f -name "*.yml")
+FILES=$(find .github -type f -name "*.yaml")
 
 for FILE in $FILES; do
     docker run -it --rm -v "${PWD}:${PWD}" -w "${PWD}" ghcr.io/sethvargo/ratchet:latest pin $FILE
