@@ -7,7 +7,7 @@ on:
         required: false
         type: string
         description: Java version to build with
-        default: "21"
+        default: "25"
       gradle-task:
         required: false
         type: string
