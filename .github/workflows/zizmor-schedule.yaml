@@ -21,7 +21,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: astral-sh/setup-uv@ed21f2f24f8dd64503750218de024bcf64c7250a # ratchet:astral-sh/setup-uv@v7.1.5
+      - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # ratchet:astral-sh/setup-uv@v7.1.6
 
       - name: Perform zizmor analysis
         run: uvx zizmor --format=sarif . > results.sarif
@@ -29,7 +29,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload zizmor analysis results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@267c4672a565967e4531438f2498370de5e8a98d # ratchet:github/codeql-action/upload-sarif@codeql-bundle-v2.23.7
+        uses: github/codeql-action/upload-sarif@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # ratchet:github/codeql-action/upload-sarif@codeql-bundle-v2.23.7
         with:
           sarif_file: results.sarif
           category: zizmor
