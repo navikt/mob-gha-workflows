@@ -54,8 +54,19 @@ jobs:
         if: matrix.language == 'kotlin'
         # Downgrade Kotlin from 2.3.0 to 2.2.21 and Java toolchain from 25 to 21 \todo Remove when https://github.com/github/codeql/issues/20661 is fixed.
         run: |
-          sed -i -Ee 's/(kotlin\("(jvm|plugin\.serialization)"\) version )"2\.3\.0"/\1"2.2.21"/' build.gradle.kts
+          echo "Before modification:"
+          grep -E 'kotlin.*version.*2\.' build.gradle.kts || true
+          grep -E 'languageVersion\.set' build.gradle.kts || true
+          
+          sed -i -Ee 's/(kotlin\("(jvm|plugin\.serialization|plugin\.spring)"\) version )"2\.3\.[0-9]+"/\1"2.2.21"/' build.gradle.kts
           sed -i -Ee 's/(languageVersion\.set\(JavaLanguageVersion\.of\()25(\)\))/\121\2/' build.gradle.kts
+          
+          echo "After modification:"
+          grep -E 'kotlin.*version.*2\.' build.gradle.kts || true
+          grep -E 'languageVersion\.set' build.gradle.kts || true
+          
+          # Kill any existing Kotlin daemon to ensure clean state
+          ./gradlew --stop || true
         shell: bash
 
       - uses: github/codeql-action/autobuild@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # ratchet:github/codeql-action/autobuild@v3
