@@ -1,0 +1,30 @@
+name: Submit GitHub Actions Dependencies
+
+on:
+    schedule:
+        - cron: "0 6 * * 1" # Every Monday at 06:00
+    workflow_dispatch:
+
+permissions: {}
+
+jobs:
+    submit-actions-dependencies:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write # Required for submitting dependencies
+
+        steps:
+            - name: Harden Runner
+              uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # ratchet:step-security/harden-runner@v2
+              with:
+                  egress-policy: audit
+
+            - name: Checkout repository
+              uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # ratchet:actions/checkout@v6
+              with:
+                  persist-credentials: false
+
+            - name: Submit Actions dependencies
+              uses: jessehouwing/actions-dependency-submission@62d04cd44fb55157bdf0aff579284bf2304f3ef0 # v1.0.5
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
