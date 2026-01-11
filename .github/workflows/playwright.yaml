@@ -52,8 +52,20 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
+      - name: Get installed Playwright version
+        id: playwright-version
+        run: echo "PLAYWRIGHT_VERSION=$(pnpm list @playwright/test --json | jq -r '.[0].devDependencies["@playwright/test"].version')" >> $GITHUB_ENV
+
+      - name: Cache playwright binaries
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # ratchet:actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
 
       - name: Run Playwright tests (including accessibility)
         run: $PLAYWRIGHT_COMMAND
