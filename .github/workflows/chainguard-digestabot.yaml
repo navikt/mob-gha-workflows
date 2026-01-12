@@ -16,10 +16,12 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # ratchet:actions/checkout@v6
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # ratchet:actions/checkout@v6
         with:
           persist-credentials: false
-      - uses: navikt/digestabot@e4b413f1eed3c97f7fd4ffa1d05204de9944d0a9 # ratchet:navikt/digestabot@v1.1.1
+      - name: Run Digestabot
+        uses: navikt/digestabot@e4b413f1eed3c97f7fd4ffa1d05204de9944d0a9 # ratchet:navikt/digestabot@v1.1.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           team: okonomi

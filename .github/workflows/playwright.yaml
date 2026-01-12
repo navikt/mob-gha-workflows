@@ -29,16 +29,19 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # ratchet:actions/checkout@v6
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # ratchet:actions/checkout@v6
         with:
           persist-credentials: false
 
-      - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # ratchet:pnpm/action-setup@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # ratchet:pnpm/action-setup@v4
         with:
           version: ${{ inputs.pnpm-version }}
           run_install: false
 
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # ratchet:actions/setup-node@v6
+      - name: Set up Node.js
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # ratchet:actions/setup-node@v6
         with:
           node-version: ${{ inputs.node-version }}
           cache: "pnpm"
@@ -54,14 +57,15 @@ jobs:
 
       - name: Get installed Playwright version
         id: playwright-version
-        run: echo "PLAYWRIGHT_VERSION=$(pnpm list @playwright/test --json | jq -r '.[0].devDependencies["@playwright/test"].version')" >> $GITHUB_ENV
+        run: echo "PLAYWRIGHT_VERSION=$(pnpm list @playwright/test --json | jq -r '.[0].devDependencies["@playwright/test"].version')" >> $GITHUB_ENV && \
+             echo "::set-output name=PLAYWRIGHT_VERSION::$(pnpm list @playwright/test --json | jq -r '.[0].devDependencies["@playwright/test"].version')"
 
       - name: Cache playwright binaries
         uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # ratchet:actions/cache@v4
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.PLAYWRIGHT_VERSION }}
 
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps
@@ -72,7 +76,8 @@ jobs:
         env:
           PLAYWRIGHT_COMMAND: ${{ inputs.playwright-command }}
 
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # ratchet:actions/upload-artifact@v5
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # ratchet:actions/upload-artifact@v5
         if: ${{ !cancelled() }}
         with:
           name: playwright-report

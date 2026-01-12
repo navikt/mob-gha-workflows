@@ -33,7 +33,8 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # ratchet:actions/checkout@v6
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # ratchet:actions/checkout@v6
         with:
           persist-credentials: false
 
@@ -45,7 +46,8 @@ jobs:
           java-version: "21"
           distribution: "temurin"
 
-      - uses: github/codeql-action/init@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # ratchet:github/codeql-action/init@v3
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # ratchet:github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
           queries: security-extended,security-and-quality
@@ -57,19 +59,20 @@ jobs:
           echo "Before modification:"
           grep -E 'kotlin.*version.*2\.' build.gradle.kts || true
           grep -E 'languageVersion\.set' build.gradle.kts || true
-          
+
           sed -i -Ee 's/(kotlin\("(jvm|plugin\.serialization|plugin\.spring)"\) version )"2\.3\.[0-9]+"/\1"2.2.21"/' build.gradle.kts
           sed -i -Ee 's/(languageVersion\.set\(JavaLanguageVersion\.of\()25(\)\))/\121\2/' build.gradle.kts
-          
+
           echo "After modification:"
           grep -E 'kotlin.*version.*2\.' build.gradle.kts || true
           grep -E 'languageVersion\.set' build.gradle.kts || true
-          
+
           # Kill any existing Kotlin daemon to ensure clean state
           ./gradlew --stop || true
         shell: bash
 
-      - uses: github/codeql-action/autobuild@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # ratchet:github/codeql-action/autobuild@v3
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # ratchet:github/codeql-action/autobuild@v3
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # ratchet:github/codeql-action/analyze@v3

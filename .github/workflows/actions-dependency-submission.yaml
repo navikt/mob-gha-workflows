@@ -2,7 +2,7 @@ name: Submit GitHub Actions Dependencies
 
 on:
     schedule:
-        - cron: "0 6 * * 1" # Every Monday at 06:00
+        - cron: "0 6 * * 1"
     workflow_dispatch:
 
 permissions: {}
@@ -11,7 +11,7 @@ jobs:
     submit-actions-dependencies:
         runs-on: ubuntu-latest
         permissions:
-            contents: write # Required for submitting dependencies
+            contents: write
 
         steps:
             - name: Harden Runner
