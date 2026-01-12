@@ -1,4 +1,4 @@
-name: Run application tests
+name: Run tests
 
 on:
   workflow_call:
@@ -15,7 +15,7 @@ on:
         default: "./gradlew test --configuration-cache"
 
 jobs:
-  run-application-tests:
+  run-tests:
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
