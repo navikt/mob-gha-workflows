@@ -79,6 +79,15 @@ jobs:
           node-version: ${{ inputs.node-version }}
           cache: "pnpm"
 
+      - name: Cache Playwright browsers
+        if: ${{ !cancelled() }}
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
       - name: Install dependencies for client
         run: |
           pnpm config set //npm.pkg.github.com/:_authToken $NODE_AUTH_TOKEN
@@ -98,6 +107,32 @@ jobs:
           pnpm install --frozen-lockfile
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
+
+      - name: Install Playwright browsers (if Playwright is present)
+        run: |
+          if grep -q '"playwright".*:' package.json; then
+            pnpm exec playwright install --with-deps
+          else
+            echo "Playwright not found in package.json, skipping browser install"
+          fi
+
+      - name: Run Playwright (if configured)
+        run: |
+          if grep -q '"playwright".*:' package.json; then
+            pnpm run playwright
+          else
+            echo "Playwright script not found in package.json, skipping Playwright tests"
+          fi
+
+      - name: Run Vitest (if configured)
+        run: |
+          if grep -q '"vitest".*:' package.json; then
+            $VITEST_COMMAND
+          else
+            echo "Vitest script not found in package.json, skipping tests"
+          fi
+        env:
+          VITEST_COMMAND: ${{ inputs.vitest-command }}
 
       - name: Build server
         if: ${{ ! cancelled() && hashFiles('server/package.json') != '' }}
@@ -119,16 +154,6 @@ jobs:
         env:
           APP_BUILD_COMMAND: ${{ inputs.app-build-command }}
           ASTRO_KEY: ${{ secrets.ASTRO_KEY }}
-
-      - name: Run Vitest (if configured)
-        run: |
-          if grep -q '"vitest".*:' package.json; then
-            $VITEST_COMMAND
-          else
-            echo "Vitest script not found in package.json, skipping tests"
-          fi
-        env:
-          VITEST_COMMAND: ${{ inputs.vitest-command }}
 
       - name: Push Docker Image to GAR
         uses: nais/docker-build-push@791ebb6f74b82849c742a9bc9c97abe44c6c111f # ratchet:nais/docker-build-push@v0
