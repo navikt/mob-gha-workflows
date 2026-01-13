@@ -45,6 +45,9 @@ on:
 jobs:
   dependabot-automerge:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     outputs:
       merged-pr-count: ${{ steps.automerge.outputs.merged-pr-count }}
     steps:
