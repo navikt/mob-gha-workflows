@@ -94,7 +94,16 @@ jobs:
             echo "found=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Get Playwright version
+      - name: Check for Vitest in package.json
+        id: vitest-check
+        run: |
+          if grep -q '"vitest".*:' package.json; then
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Get Playwright version (if Playwright is present)
         if: ${{ steps.playwright-check.outputs.found == 'true' }}
         id: playwright-version
         run: |
@@ -110,27 +119,19 @@ jobs:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.PLAYWRIGHT_VERSION }}
 
-      - name: Install Playwright browsers (if Playwright is present)
+      - name: Install Playwright browsers (if Playwright is present and cache missed)
         if: ${{ steps.playwright-check.outputs.found == 'true' && steps.playwright-cache.outputs.cache-hit != 'true' }}
         run: pnpm exec playwright install --with-deps
 
       - name: Run Playwright (if configured)
-        run: |
-          if grep -q '"playwright".*:' package.json; then
-            $PLAYWRIGHT_COMMAND
-          else
-            echo "Playwright script not found in package.json, skipping Playwright tests"
-          fi
+        if: ${{ steps.playwright-check.outputs.found == 'true' }}
+        run: $PLAYWRIGHT_COMMAND
         env:
           PLAYWRIGHT_COMMAND: ${{ inputs.playwright-command }}
 
       - name: Run Vitest (if configured)
-        run: |
-          if grep -q '"vitest".*:' package.json; then
-            $VITEST_COMMAND
-          else
-            echo "Vitest script not found in package.json, skipping Vitest tests"
-          fi
+        if: ${{ steps.vitest-check.outputs.found == 'true' }}
+        run: $VITEST_COMMAND
         env:
           VITEST_COMMAND: ${{ inputs.vitest-command }}
 
