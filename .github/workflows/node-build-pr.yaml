@@ -91,7 +91,7 @@ jobs:
 
       - name: Cache Playwright browsers (if Playwright is present)
         if: ${{ !cancelled() && steps.playwright-check.outputs.found == 'true' }}
-        uses: actions/cache@v4
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # ratchet:actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
