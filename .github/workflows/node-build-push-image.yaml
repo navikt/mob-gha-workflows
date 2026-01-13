@@ -79,15 +79,6 @@ jobs:
           node-version: ${{ inputs.node-version }}
           cache: "pnpm"
 
-      - name: Cache Playwright browsers
-        if: ${{ !cancelled() }}
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-playwright-
-
       - name: Install dependencies for client
         run: |
           pnpm config set //npm.pkg.github.com/:_authToken $NODE_AUTH_TOKEN
@@ -107,6 +98,24 @@ jobs:
           pnpm install --frozen-lockfile
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
+
+      - name: Check for Playwright in package.json
+        id: playwright-check
+        run: |
+          if grep -q '"playwright".*:' package.json; then
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Cache Playwright browsers (if Playwright is present)
+        if: ${{ !cancelled() && steps.playwright-check.outputs.found == 'true' }}
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
 
       - name: Install Playwright browsers (if Playwright is present)
         run: |
