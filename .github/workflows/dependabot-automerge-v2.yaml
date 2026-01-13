@@ -54,7 +54,7 @@ jobs:
           egress-policy: audit
 
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # ratchet:actions/create-github-app-token@v2
         id: app-token
         with:
           app-id: ${{ secrets.APP_ID }}
@@ -62,7 +62,7 @@ jobs:
 
       - name: Automerge Dependabot PRs
         id: automerge
-        uses: navikt/automerge-dependabot@6a221c3744d2fe1e69d419d22b00a0e5c5d85b8f # ratchet:navikt/automerge-dependabot@main
+        uses: navikt/automerge-dependabot@ac191a29cb73550ba1506bfea3ee0c38fbbdeeb2 # ratchet:navikt/automerge-dependabot@main
         with:
           token: ${{ steps.app-token.outputs.token }}
           minimum-age-of-pr: ${{ inputs.minimum-age-of-pr }}
