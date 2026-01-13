@@ -33,6 +33,11 @@ on:
         type: string
         description: Command to run Vitest tests
         default: "pnpm run vitest"
+      playwright-command:
+        required: false
+        type: string
+        description: Command to run Playwright tests
+        default: "pnpm run playwright"
 
 jobs:
   build-test-pr:
@@ -89,37 +94,45 @@ jobs:
             echo "found=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Get Playwright version
+        if: ${{ steps.playwright-check.outputs.found == 'true' }}
+        id: playwright-version
+        run: |
+          VERSION=$(pnpm ls playwright --depth=0 --json | grep -oE '"version":"[0-9]+\.[0-9]+\.[0-9]+"' | head -1 | cut -d':' -f2 | tr -d '" ')
+          if [ -z "$VERSION" ]; then
+            VERSION=latest
+          fi
+          echo "PLAYWRIGHT_VERSION=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Cache Playwright browsers (if Playwright is present)
-        if: ${{ !cancelled() && steps.playwright-check.outputs.found == 'true' }}
+        if: ${{ steps.playwright-check.outputs.found == 'true' }}
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # ratchet:actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.PLAYWRIGHT_VERSION }}
           restore-keys: |
             ${{ runner.os }}-playwright-
 
-      - name: Install Playwright browsers (if Playwright is present)
-        run: |
-          if grep -q '"playwright".*:' package.json; then
-            pnpm exec playwright install --with-deps
-          else
-            echo "Playwright not found in package.json, skipping browser install"
-          fi
+      - name: Install Playwright browsers (if Playwright is present and cache miss)
+        if: ${{ steps.playwright-check.outputs.found == 'true' && steps.playwright-cache.outputs.cache-hit != 'true' }}
+        run: pnpm exec playwright install --with-deps
 
       - name: Run Playwright (if configured)
         run: |
           if grep -q '"playwright".*:' package.json; then
-            pnpm run playwright
+            $PLAYWRIGHT_COMMAND
           else
             echo "Playwright script not found in package.json, skipping Playwright tests"
           fi
+        env:
+          PLAYWRIGHT_COMMAND: ${{ inputs.playwright-command }}
 
       - name: Run Vitest (if configured)
         run: |
           if grep -q '"vitest".*:' package.json; then
             $VITEST_COMMAND
           else
-            echo "Vitest script not found in package.json, skipping tests"
+            echo "Vitest script not found in package.json, skipping Vitest tests"
           fi
         env:
           VITEST_COMMAND: ${{ inputs.vitest-command }}
