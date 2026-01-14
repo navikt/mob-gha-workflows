@@ -1,10 +1,10 @@
-name: Chainguard Digestabot Check
+name: Chainguard Digestabot
 
 on:
   workflow_call:
 
 jobs:
-  digest-update:
+  chainguard-digests-update:
     runs-on: ubuntu-latest
     permissions:
       contents: write

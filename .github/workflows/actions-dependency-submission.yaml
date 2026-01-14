@@ -1,4 +1,4 @@
-name: Submit GitHub Actions Dependencies
+name: Actions Dependency Submission
 
 on:
     schedule:
