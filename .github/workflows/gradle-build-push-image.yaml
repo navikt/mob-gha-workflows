@@ -1,0 +1,68 @@
+name: Assemble application & build/push image
+
+on:
+  workflow_call:
+    inputs:
+      docker-context:
+        required: false
+        type: string
+        description: Path to the Docker build context
+        default: "."
+      dockerfile:
+        required: false
+        type: string
+        description: Path to the Dockerfile
+        default: "Dockerfile"
+      image-tag:
+        required: false
+        type: string
+        description: Docker image tag
+        default: "latest"
+      image-suffix:
+        required: false
+        type: string
+        description: Suffix to append to the image tag
+        default: ""
+      use-artifact:
+        required: false
+        type: boolean
+        default: true
+        description: Use pre-built artifact from build step (requires gradle-build-and-test to run first)
+    outputs:
+      image:
+        description: Google Artifact Registry image
+        value: ${{ jobs.build-push-image.outputs.image }}
+
+jobs:
+  build-push-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # ratchet:step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # ratchet:actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Download build artifact
+        if: ${{ inputs.use-artifact == true }}
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # ratchet:actions/download-artifact@v7
+        with:
+          name: gradle-build-${{ github.run_id }}
+          path: build/
+
+      - name: Push Docker Image to GAR
+        uses: nais/docker-build-push@791ebb6f74b82849c742a9bc9c97abe44c6c111f # ratchet:nais/docker-build-push@v0
+        id: docker-build-push
+        with:
+          team: okonomi
+          dockerfile: ${{ inputs.dockerfile }}
+          docker_context: ${{ inputs.docker-context }}
+          image_suffix: ${{ inputs.image-suffix }}
+          tag: ${{ inputs.image-tag }}
+
+    outputs:
+      image: ${{ steps.docker-build-push.outputs.image }}

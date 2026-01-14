@@ -1,4 +1,4 @@
-name: Assemble application & build/push image
+name: Build and test application
 
 on:
   workflow_call:
@@ -11,40 +11,21 @@ on:
       gradle-task:
         required: false
         type: string
-        description: Gradle task to run
-        default: "./gradlew installDist --configuration-cache"
-      docker-context:
+        description: Gradle task to run (build and test)
+        default: "./gradlew build installDist --configuration-cache"
+      upload-artifact:
         required: false
-        type: string
-        description: Path to the Docker build context
-        default: "."
-      dockerfile:
-        required: false
-        type: string
-        description: Path to the Dockerfile
-        default: "Dockerfile"
-      image-tag:
-        required: false
-        type: string
-        description: Docker image tag
-        default: "latest"
-      image-suffix:
-        required: false
-        type: string
-        description: Suffix to append to the image tag
-        default: ""
+        type: boolean
+        default: false
+        description: Upload build artifact for Docker image builds
       generate-dependency-graph:
         required: false
         type: boolean
         default: false
         description: Generate and submit dependency graph
-    outputs:
-      image:
-        description: Google Artifact Registry image
-        value: ${{ jobs.assemble-application-build-push-image.outputs.image }}
 
 jobs:
-  assemble-application-build-push-image:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
@@ -71,20 +52,15 @@ jobs:
         with:
           dependency-graph: generate-and-submit
 
-      - name: Build application
+      - name: Build and test application
         env:
           GRADLE_TASK: ${{ inputs.gradle-task }}
         run: $GRADLE_TASK
 
-      - name: Push Docker Image to GAR
-        uses: nais/docker-build-push@791ebb6f74b82849c742a9bc9c97abe44c6c111f # ratchet:nais/docker-build-push@v0
-        id: docker-build-push
+      - name: Upload build artifact
+        if: ${{ inputs.upload-artifact == true }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # ratchet:actions/upload-artifact@v6
         with:
-          team: okonomi
-          dockerfile: ${{ inputs.dockerfile }}
-          docker_context: ${{ inputs.docker-context }}
-          image_suffix: ${{ inputs.image-suffix }}
-          tag: ${{ inputs.image-tag }}
-
-    outputs:
-      image: ${{ steps.docker-build-push.outputs.image }}
+          name: gradle-build-${{ github.run_id }}
+          path: build/
+          retention-days: 1
