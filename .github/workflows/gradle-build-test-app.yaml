@@ -1,0 +1,66 @@
+name: Build and test application
+
+on:
+  workflow_call:
+    inputs:
+      java-version:
+        required: false
+        type: string
+        description: Java version to build with
+        default: "25"
+      gradle-task:
+        required: false
+        type: string
+        description: Gradle task to run (build and test)
+        default: "./gradlew build installDist --configuration-cache"
+      upload-artifact:
+        required: false
+        type: boolean
+        default: false
+        description: Upload build artifact for Docker image builds
+      generate-dependency-graph:
+        required: false
+        type: boolean
+        default: false
+        description: Generate and submit dependency graph
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # ratchet:step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # ratchet:actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK
+        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # ratchet:actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: ${{ inputs.java-version }}
+
+      - name: Generate and submit dependency graph
+        if: ${{ inputs.generate-dependency-graph == true }}
+        uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # ratchet:gradle/actions/setup-gradle@v5
+        env: # Eksluder test dependencies
+          DEPENDENCY_GRAPH_INCLUDE_CONFIGURATIONS: compileClasspath|runtimeClasspath
+        with:
+          dependency-graph: generate-and-submit
+
+      - name: Build and test application
+        env:
+          GRADLE_TASK: ${{ inputs.gradle-task }}
+        run: $GRADLE_TASK
+
+      - name: Upload build artifact
+        if: ${{ inputs.upload-artifact == true }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # ratchet:actions/upload-artifact@v6
+        with:
+          name: gradle-build-${{ github.run_id }}
+          path: build/
+          retention-days: 1

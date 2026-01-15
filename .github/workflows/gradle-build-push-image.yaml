@@ -1,18 +1,8 @@
-name: Assemble application & build/push image
+name: Build and push image
 
 on:
   workflow_call:
     inputs:
-      java-version:
-        required: false
-        type: string
-        description: Java version to build with
-        default: "25"
-      gradle-task:
-        required: false
-        type: string
-        description: Gradle task to run
-        default: "./gradlew installDist --configuration-cache"
       docker-context:
         required: false
         type: string
@@ -33,18 +23,18 @@ on:
         type: string
         description: Suffix to append to the image tag
         default: ""
-      generate-dependency-graph:
+      use-artifact:
         required: false
         type: boolean
-        default: false
-        description: Generate and submit dependency graph
+        default: true
+        description: Use pre-built artifact from build step (requires gradle-build-and-test to run first)
     outputs:
       image:
         description: Google Artifact Registry image
-        value: ${{ jobs.assemble-application-build-push-image.outputs.image }}
+        value: ${{ jobs.build-push-image.outputs.image }}
 
 jobs:
-  assemble-application-build-push-image:
+  build-push-image:
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
@@ -57,24 +47,12 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up JDK
-        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # ratchet:actions/setup-java@v5
+      - name: Download build artifact
+        if: ${{ inputs.use-artifact == true }}
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # ratchet:actions/download-artifact@v7
         with:
-          distribution: "temurin"
-          java-version: ${{ inputs.java-version }}
-
-      - name: Generate and submit dependency graph
-        if: ${{ inputs.generate-dependency-graph == true }}
-        uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # ratchet:gradle/actions/setup-gradle@v5
-        env: # Eksluder test dependencies
-          DEPENDENCY_GRAPH_INCLUDE_CONFIGURATIONS: compileClasspath|runtimeClasspath
-        with:
-          dependency-graph: generate-and-submit
-
-      - name: Build application
-        env:
-          GRADLE_TASK: ${{ inputs.gradle-task }}
-        run: $GRADLE_TASK
+          name: gradle-build-${{ github.run_id }}
+          path: build/
 
       - name: Push Docker Image to GAR
         uses: nais/docker-build-push@791ebb6f74b82849c742a9bc9c97abe44c6c111f # ratchet:nais/docker-build-push@v0
