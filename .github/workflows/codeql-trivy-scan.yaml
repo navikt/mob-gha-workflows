@@ -38,14 +38,6 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Work around CodeQL issue 20661 - Set up JDK 21
-        if: matrix.language == 'kotlin'
-        # Downgrade Java from 25 to 21 \todo Remove when https://github.com/github/codeql/issues/20661 is fixed.
-        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # ratchet:actions/setup-java@v4
-        with:
-          java-version: "21"
-          distribution: "temurin"
-
       - name: Initialize CodeQL
         uses: github/codeql-action/init@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # ratchet:github/codeql-action/init@v3
         with:
@@ -56,44 +48,11 @@ jobs:
         if: matrix.language == 'kotlin'
         # Downgrade Kotlin from 2.3.0 to 2.2.21 and Java toolchain from 25 to 21 \todo Remove when https://github.com/github/codeql/issues/20661 is fixed.
         run: |
-          echo "Before modification:"
-          grep -E 'kotlin.*version.*2\.' build.gradle.kts || true
-          grep -E 'languageVersion\.set' build.gradle.kts || true
-
-          sed -i -Ee 's/(kotlin\("(jvm|plugin\.serialization|plugin\.spring)"\) version )"2\.3\.[0-9]+"/\1"2.2.21"/' build.gradle.kts
+          sed -i -Ee 's/(kotlin\("(jvm|plugin\.serialization)"\) version )"2\.3\.0"/\1"2.2.21"/' build.gradle.kts
           sed -i -Ee 's/(languageVersion\.set\(JavaLanguageVersion\.of\()25(\)\))/\121\2/' build.gradle.kts
-
-          echo "After modification:"
-          grep -E 'kotlin.*version.*2\.' build.gradle.kts || true
-          grep -E 'languageVersion\.set' build.gradle.kts || true
-
-          # Kill any existing Kotlin daemon to ensure clean state
-          ./gradlew --stop || true
         shell: bash
 
-      - name: Work around CodeQL issue 20661 - Custom build for Kotlin (handles kotliquery)
-        if: matrix.language == 'kotlin'
-        # For Kotlin projects:
-        # - If uses kotliquery: skip testClasses task to avoid JDK 25 requirement, compile source only (classes)
-        # - If no kotliquery: normal build with testClasses
-        # CodeQL doesn't analyze tests anyway
-        # \todo REMOVE THIS ENTIRE STEP when https://github.com/github/codeql/issues/20661 is fixed.
-        # \todo ALSO RESTORE Autobuild step to run for all languages when issue is fixed.
-        run: |
-          if grep -q "kotliquery" build.gradle.kts; then
-            echo "kotliquery found - building source code only (classes task, skipping tests)"
-            ./gradlew --no-daemon -S -Dorg.gradle.dependency.verification=off -Dorg.gradle.warning.mode=none clean classes
-          else
-            echo "No kotliquery - normal build with test compilation"
-            ./gradlew --no-daemon -S -Dorg.gradle.dependency.verification=off -Dorg.gradle.warning.mode=none clean testClasses
-          fi
-        shell: bash
-
-      - name: Autobuild (only for non-Kotlin languages)
-        if: matrix.language != 'kotlin'
-        # \todo REMOVE THIS CONDITION and restore to: uses: github/codeql-action/autobuild
-        # when Kotlin workaround is no longer needed
-        uses: github/codeql-action/autobuild@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # ratchet:github/codeql-action/autobuild@v3
+      - uses: github/codeql-action/autobuild@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # ratchet:github/codeql-action/autobuild@v3
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # ratchet:github/codeql-action/analyze@v3
