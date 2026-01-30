@@ -73,6 +73,9 @@ jobs:
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # ratchet:github/codeql-action/autobuild@v3
+        env:
+          # Disable configuration cache to work around JVM version mismatch with dependencies requiring Java 25 \todo Remove when CodeQL supports Java 25
+          GRADLE_OPTS: "-Dorg.gradle.configuration-cache=false -Dorg.gradle.caching=false"
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # ratchet:github/codeql-action/analyze@v3
