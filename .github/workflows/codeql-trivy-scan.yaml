@@ -71,11 +71,29 @@ jobs:
           ./gradlew --stop || true
         shell: bash
 
-      - name: Autobuild
+      - name: Work around CodeQL issue 20661 - Custom build for Kotlin (handles kotliquery)
+        if: matrix.language == 'kotlin'
+        # For Kotlin projects:
+        # - If uses kotliquery: skip testClasses task to avoid JDK 25 requirement, compile source only (classes)
+        # - If no kotliquery: normal build with testClasses
+        # CodeQL doesn't analyze tests anyway
+        # \todo REMOVE THIS ENTIRE STEP when https://github.com/github/codeql/issues/20661 is fixed.
+        # \todo ALSO RESTORE Autobuild step to run for all languages when issue is fixed.
+        run: |
+          if grep -q "kotliquery" build.gradle.kts; then
+            echo "kotliquery found - building source code only (classes task, skipping tests)"
+            ./gradlew --no-daemon -S -Dorg.gradle.dependency.verification=off -Dorg.gradle.warning.mode=none clean classes
+          else
+            echo "No kotliquery - normal build with test compilation"
+            ./gradlew --no-daemon -S -Dorg.gradle.dependency.verification=off -Dorg.gradle.warning.mode=none clean testClasses
+          fi
+        shell: bash
+
+      - name: Autobuild (only for non-Kotlin languages)
+        if: matrix.language != 'kotlin'
+        # \todo REMOVE THIS CONDITION and restore to: uses: github/codeql-action/autobuild
+        # when Kotlin workaround is no longer needed
         uses: github/codeql-action/autobuild@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # ratchet:github/codeql-action/autobuild@v3
-        env:
-          # Disable configuration cache to work around JVM version mismatch with dependencies requiring Java 25 \todo Remove when CodeQL supports Java 25
-          GRADLE_OPTS: "-Dorg.gradle.configuration-cache=false -Dorg.gradle.caching=false"
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # ratchet:github/codeql-action/analyze@v3
