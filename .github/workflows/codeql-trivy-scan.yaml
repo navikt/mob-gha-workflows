@@ -53,6 +53,15 @@ jobs:
           sed -i -Ee 's/(languageVersion\.set\(JavaLanguageVersion\.of\()25(\)\))/\121\2/' build.gradle.kts
         shell: bash
 
+      - name: Set up Java 25 for Kotlin projects with kotliquery
+        if: matrix.language == 'kotlin'
+        uses: actions/setup-java@v4
+        with:
+          java-version: "25"
+          distribution: "temurin"
+        # This ensures Java 25 is available for kotliquery (which requires JDK 25+)
+        # even though Kotlin 2.2.21 targets JVM 21 via languageVersion downgrade
+
       - uses: github/codeql-action/autobuild@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # ratchet:github/codeql-action/autobuild@v3
 
       - name: Perform CodeQL Analysis
