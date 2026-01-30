@@ -46,9 +46,11 @@ jobs:
 
       - name: Work around CodeQL issue 20661 - Downgrade Kotlin
         if: matrix.language == 'kotlin'
-        # Downgrade Kotlin from 2.3.0 to 2.2.21 \todo Remove when https://github.com/github/codeql/issues/20661 is fixed.
+        # Downgrade Kotlin from 2.3.0 to 2.2.21 and languageVersion to 21 (Kotlin 2.2.21 doesn't support Java 25 targets)
+        # \todo Remove when https://github.com/github/codeql/issues/20661 is fixed.
         run: |
           sed -i -Ee 's/(kotlin\("(jvm|plugin\.serialization)"\) version )"2\.3\.0"/\1"2.2.21"/' build.gradle.kts
+          sed -i -Ee 's/(languageVersion\.set\(JavaLanguageVersion\.of\()25(\)\))/\121\2/' build.gradle.kts
         shell: bash
 
       - uses: github/codeql-action/autobuild@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # ratchet:github/codeql-action/autobuild@v3
