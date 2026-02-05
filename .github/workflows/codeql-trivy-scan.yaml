@@ -38,38 +38,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Work around CodeQL issue 20661 - Set up JDK 21
-        if: matrix.language == 'kotlin'
-        # Downgrade Java from 25 to 21 \todo Remove when https://github.com/github/codeql/issues/20661 is fixed.
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # ratchet:actions/setup-java@v4
-        with:
-          java-version: "21"
-          distribution: "temurin"
-
       - name: Initialize CodeQL
         uses: github/codeql-action/init@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # ratchet:github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
           queries: security-extended,security-and-quality
-
-      - name: Work around CodeQL issue 20661 - Downgrade Kotlin
-        if: matrix.language == 'kotlin'
-        # Downgrade Kotlin from 2.3.0 to 2.2.21 and Java toolchain from 25 to 21 \todo Remove when https://github.com/github/codeql/issues/20661 is fixed.
-        run: |
-          echo "Before modification:"
-          grep -E 'kotlin.*version.*2\.' build.gradle.kts || true
-          grep -E 'languageVersion\.set' build.gradle.kts || true
-
-          sed -i -Ee 's/(kotlin\("(jvm|plugin\.serialization|plugin\.spring)"\) version )"2\.3\.[0-9]+"/\1"2.2.21"/' build.gradle.kts
-          sed -i -Ee 's/(languageVersion\.set\(JavaLanguageVersion\.of\()25(\)\))/\121\2/' build.gradle.kts
-
-          echo "After modification:"
-          grep -E 'kotlin.*version.*2\.' build.gradle.kts || true
-          grep -E 'languageVersion\.set' build.gradle.kts || true
-
-          # Kill any existing Kotlin daemon to ensure clean state
-          ./gradlew --stop || true
-        shell: bash
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # ratchet:github/codeql-action/autobuild@v3
