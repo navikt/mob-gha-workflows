@@ -35,7 +35,7 @@ jobs:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.PRIVATE_KEY }}
 
-       - name: Automerge digestabot PRs
+      - name: Automerge digestabot PRs
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
