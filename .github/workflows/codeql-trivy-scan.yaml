@@ -41,7 +41,6 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
-          tools: 2.24.1
           languages: ${{ matrix.language }}
           queries: security-extended,security-and-quality
 
