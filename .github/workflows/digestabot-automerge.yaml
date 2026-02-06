@@ -35,57 +35,15 @@ jobs:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.PRIVATE_KEY }}
 
-      - name: Automerge digestabot PRs
+       - name: Automerge digestabot PRs
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          prs=$(gh pr list --label digestabot --json number,title,mergeable,statusCheckRollup,author)
+          prs=$(gh pr list --label digestabot --json number,mergeable,statusCheckRollup,author)
           
           if [ -z "$prs" ] || [ "$prs" = "[]" ]; then
             echo "No digestabot PRs found"
             exit 0
-          fi
-          
-          echo "## Digestabot Automerge Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          total_prs=$(echo "$prs" | jq 'length')
-          eligible_prs=$(echo "$prs" | jq '[.[] | 
-            select(.author.login == "app/github-actions") |
-            select(.mergeable == "MERGEABLE") | 
-            select(.statusCheckRollup // [] | all(.conclusion == "SUCCESS" or .conclusion == "SKIPPED"))] | length')
-          
-          echo "Found **$total_prs** digestabot PR(s), **$eligible_prs** will be merged" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          if [ "$eligible_prs" -gt 0 ]; then
-            echo "### PRs to Merge" >> $GITHUB_STEP_SUMMARY
-            echo "| PR | Title |" >> $GITHUB_STEP_SUMMARY
-            echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-            echo "$prs" | jq -r '.[] | 
-              select(.author.login == "app/github-actions") |
-              select(.mergeable == "MERGEABLE") | 
-              select(.statusCheckRollup // [] | all(.conclusion == "SUCCESS" or .conclusion == "SKIPPED")) |
-              "| #\(.number) | \(.title) |"' >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-          fi
-          
-          filtered_count=$((total_prs - eligible_prs))
-          if [ "$filtered_count" -gt 0 ]; then
-            echo "### PRs Filtered Out" >> $GITHUB_STEP_SUMMARY
-            echo "| PR | Title | Reason |" >> $GITHUB_STEP_SUMMARY
-            echo "|---|---|---|" >> $GITHUB_STEP_SUMMARY
-            echo "$prs" | jq -r --arg eligible "$eligible_prs" '.[] | 
-              select(
-                (.author.login != "app/github-actions") or
-                (.mergeable != "MERGEABLE") or
-                (.statusCheckRollup // [] | any(.conclusion != "SUCCESS" and .conclusion != "SKIPPED"))
-              ) |
-              "| #\(.number) | \(.title) | " + 
-              if .author.login != "app/github-actions" then "Wrong author (\(.author.login))"
-              elif .mergeable != "MERGEABLE" then "Not mergeable (\(.mergeable))"
-              else "Status checks failed" end + " |"' >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
           fi
           
           merged_count=0
@@ -102,5 +60,4 @@ jobs:
             select(.statusCheckRollup // [] | all(.conclusion == "SUCCESS" or .conclusion == "SKIPPED")) |
             .number')
           
-          echo "### Result" >> $GITHUB_STEP_SUMMARY
-          echo "Merged **$merged_count** digestabot PR(s)" >> $GITHUB_STEP_SUMMARY
+          echo "Merged $merged_count digestabot PR(s)"
