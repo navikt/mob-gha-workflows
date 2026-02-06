@@ -40,7 +40,7 @@ jobs:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           MIN_AGE_DAYS: 2
         run: |
-          prs=$(gh pr list --label digestabot --author github-actions --json number,createdAt,mergeable,statusCheckRollup)
+          prs=$(gh pr list --label digestabot --json number,createdAt,mergeable,statusCheckRollup,author)
           
           if [ -z "$prs" ] || [ "$prs" = "[]" ]; then
             echo "No digestabot PRs found"
@@ -58,6 +58,7 @@ jobs:
               fi
             fi
           done < <(echo "$prs" | jq -r --argjson min_age "$min_age_seconds" '.[] | 
+            select(.author.login == "github-actions[bot]") |
             select(.mergeable == "MERGEABLE") | 
             select(.statusCheckRollup // [] | all(.conclusion == "SUCCESS" or .conclusion == "SKIPPED")) |
             select((now - (.createdAt | fromdateiso8601)) > $min_age) |
