@@ -1,0 +1,62 @@
+name: Digestabot auto-merge
+
+on:
+  workflow_call:
+    secrets:
+      APP_ID:
+        description: "GitHub App ID"
+        required: true
+      PRIVATE_KEY:
+        description: "GitHub App Private Key"
+        required: true
+  workflow_dispatch:
+
+jobs:
+  digestabot-automerge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9
+        with:
+          egress-policy: audit
+
+      - name: Create GitHub App Token
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf
+        id: app-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+
+      - name: Automerge digestabot PRs
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          MIN_AGE_DAYS: 2
+        run: |
+          prs=$(gh pr list --label digestabot --author github-actions --json number,createdAt,mergeable,statusCheckRollup)
+          
+          if [ -z "$prs" ] || [ "$prs" = "[]" ]; then
+            echo "No digestabot PRs found"
+            exit 0
+          fi
+          
+          merged_count=0
+          min_age_seconds=$((MIN_AGE_DAYS * 86400))
+          
+          echo "$prs" | jq -r --argjson min_age "$min_age_seconds" '.[] | 
+            select(.mergeable == "MERGEABLE") | 
+            select(.statusCheckRollup // [] | all(.conclusion == "SUCCESS" or .conclusion == "SKIPPED")) |
+            select((now - (.createdAt | fromdateiso8601)) > $min_age) |
+            .number' | \
+          while read -r pr_number; do
+            echo "Approving and merging PR #$pr_number"
+            if gh pr review "$pr_number" --approve; then
+              if gh pr merge "$pr_number" --merge --auto; then
+                merged_count=$((merged_count + 1))
+              fi
+            fi
+          done
+          
+          echo "Merged $merged_count digestabot PR(s)"
