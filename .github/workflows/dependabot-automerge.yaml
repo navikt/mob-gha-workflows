@@ -23,6 +23,11 @@ on:
         required: false
         type: string
         default: ""
+      always-allow-labels:
+        description: "Comma-separated list of PR labels that will bypass all filters"
+        required: false
+        type: string
+        default: "digestabot"  
       auto-approve:
         description: "Whether to automatically approve PRs before merging them"
         required: false
@@ -73,6 +78,7 @@ jobs:
           ignored-dependencies: ${{ inputs.ignored-dependencies }}
           semver-filter: ${{ inputs.semver-filter }}
           always-allow: ${{ inputs.always-allow }}
+          always-allow-labels: ${{ inputs.always-allow-labels }}
           auto-approve: ${{ inputs.auto-approve }}
           merge-method: ${{ inputs.merge-method }}
 
