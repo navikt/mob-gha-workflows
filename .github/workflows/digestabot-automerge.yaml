@@ -26,7 +26,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6.0.2
         with:
-          persist-credentials: false    
+          persist-credentials: false
 
       - name: Create GitHub App Token
         uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf
@@ -38,26 +38,4 @@ jobs:
       - name: Automerge digestabot PRs
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          prs=$(gh pr list --label digestabot --json number,mergeable,statusCheckRollup,author)
-          
-          if [ -z "$prs" ] || [ "$prs" = "[]" ]; then
-            echo "No digestabot PRs found"
-            exit 0
-          fi
-          
-          merged_count=0
-          while read -r pr_number; do
-            echo "Approving and merging PR #$pr_number"
-            if gh pr review "$pr_number" --approve; then
-              if gh pr merge "$pr_number" --merge --auto; then
-                merged_count=$((merged_count + 1))
-              fi
-            fi
-          done < <(echo "$prs" | jq -r '.[] | 
-            select(.author.login == "app/github-actions") |
-            select(.mergeable == "MERGEABLE") | 
-            select(.statusCheckRollup // [] | all(.conclusion == "SUCCESS" or .conclusion == "SKIPPED")) |
-            .number')
-          
-          echo "Merged $merged_count digestabot PR(s)"
+        run: "prs=$(gh pr list --label digestabot --json number,mergeable,statusCheckRollup,author)\n\nif [ -z \"$prs\" ] || [ \"$prs\" = \"[]\" ]; then\n  echo \"No digestabot PRs found\"\n  exit 0\nfi\n\nmerged_count=0\nwhile read -r pr_number; do\n  echo \"Approving and merging PR #$pr_number\"\n  if gh pr review \"$pr_number\" --approve; then\n    if gh pr merge \"$pr_number\" --merge --auto; then\n      merged_count=$((merged_count + 1))\n    fi\n  fi\ndone < <(echo \"$prs\" | jq -r '.[] | \n  select(.author.login == \"app/github-actions\") |\n  select(.mergeable == \"MERGEABLE\") | \n  select(.statusCheckRollup // [] | all(.conclusion == \"SUCCESS\" or .conclusion == \"SKIPPED\")) |\n  .number')\n\necho \"Merged $merged_count digestabot PR(s)\""
