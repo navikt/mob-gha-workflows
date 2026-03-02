@@ -59,6 +59,7 @@ jobs:
         with:
           team: okonomi
 
+        # Temporarily set up Trivy manually to work around an issue with fetching the latest version of Trivy in the trivy-action. This can be removed once the issue is resolved and the trivy-action is updated to fetch the latest version correctly.
       - name: Manual Trivy Setup
         uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514 # ratchet:aquasecurity/setup-trivy@v0.2.5
         with:
