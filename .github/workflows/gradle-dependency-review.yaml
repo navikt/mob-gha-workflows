@@ -1,0 +1,32 @@
+name: Dependency Review
+
+on:
+  workflow_call:
+    inputs:
+      fail-on-severity:
+        required: false
+        type: string
+        description: Threshold for severity level (low, moderate, high, critical)
+        default: "high"
+      deny-licenses:
+        required: false
+        type: string
+        description: Comma-separated list of prohibited licenses
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6.0.2
+        with:
+          persist-credentials: false
+      - name: Dependency review
+        uses: actions/dependency-review-action@05fe4576374b728f0c523d6a13d64c25081e0803 # ratchet:actions/dependency-review-action@v4.8.3
+        with:
+          fail-on-severity: ${{ inputs.fail-on-severity }}
+          deny-licenses: ${{ inputs.deny-licenses }}
