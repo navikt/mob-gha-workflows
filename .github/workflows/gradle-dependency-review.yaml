@@ -48,3 +48,5 @@ jobs:
                   fail-on-severity: ${{ inputs.fail-on-severity }}
                   deny-licenses: ${{ inputs.deny-licenses }}
                   warn-only: ${{ inputs.warn-only }}
+                  retry-on-snapshot-warnings: true
+                  retry-on-snapshot-warnings-timeout: 120
