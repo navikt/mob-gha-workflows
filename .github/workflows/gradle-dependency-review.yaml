@@ -1,32 +1,50 @@
-name: Dependency Review
+name: Gradle dependencies review
 
 on:
-  workflow_call:
-    inputs:
-      fail-on-severity:
-        required: false
-        type: string
-        description: Threshold for severity level (low, moderate, high, critical)
-        default: "high"
-      deny-licenses:
-        required: false
-        type: string
-        description: Comma-separated list of prohibited licenses
-        default: ""
-
-permissions:
-  contents: read
+    workflow_call:
+        inputs:
+            fail-on-severity:
+                required: false
+                type: string
+                description: Threshold for severity level (low, moderate, high, critical)
+                default: "high"
+            comment-summary-in-pr:
+                required: false
+                type: string
+                description: Comment behavior for pull requests (always, on-failure, never)
+                default: "always"
+            deny-licenses:
+                required: false
+                type: string
+                description: Comma-separated list of prohibited licenses
+                default: ""
+            warn-only:
+                required: false
+                type: boolean
+                description: Report findings without failing the workflow
+                default: false
 
 jobs:
-  dependency-review:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6.0.2
-        with:
-          persist-credentials: false
-      - name: Dependency review
-        uses: actions/dependency-review-action@05fe4576374b728f0c523d6a13d64c25081e0803 # ratchet:actions/dependency-review-action@v4.8.3
-        with:
-          fail-on-severity: ${{ inputs.fail-on-severity }}
-          deny-licenses: ${{ inputs.deny-licenses }}
+    dependency-review:
+        permissions:
+            contents: read
+            pull-requests: write
+        runs-on: ubuntu-latest
+        steps:
+            - name: Harden Runner
+              uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # ratchet:step-security/harden-runner@v2.15.0
+              with:
+                  egress-policy: audit
+
+            - name: Checkout repository
+              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6.0.2
+              with:
+                  persist-credentials: false
+
+            - name: Perform dependency review
+              uses: actions/dependency-review-action@05fe4576374b728f0c523d6a13d64c25081e0803 # ratchet:actions/dependency-review-action@v4.8.3
+              with:
+                  comment-summary-in-pr: ${{ inputs.comment-summary-in-pr }}
+                  fail-on-severity: ${{ inputs.fail-on-severity }}
+                  deny-licenses: ${{ inputs.deny-licenses }}
+                  warn-only: ${{ inputs.warn-only }}
