@@ -59,13 +59,6 @@ jobs:
         with:
           team: okonomi
 
-        # Temporarily set up Trivy manually to work around an issue with fetching the latest version of Trivy in the trivy-action. This can be removed once the issue is resolved and the trivy-action is updated to fetch the latest version correctly.
-      - name: Manual Trivy Setup
-        uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514 # ratchet:aquasecurity/setup-trivy@v0.2.5
-        with:
-          cache: true
-          version: v0.69.2
-
       - name: Perform Trivy vulnerability scan on ${{ env.LATEST_PROD_IMAGE }} image
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # ratchet:aquasecurity/trivy-action@v0.35.0
         with:
@@ -78,7 +71,6 @@ jobs:
           vuln-type: "os"
           severity: "HIGH,CRITICAL"
           limit-severities-for-sarif: true
-          skip-setup-trivy: true
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@89a39a4e59826350b863aa6b6252a07ad50cf83e # ratchet:github/codeql-action/upload-sarif@v4.32.4
