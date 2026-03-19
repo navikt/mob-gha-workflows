@@ -49,13 +49,13 @@ jobs:
 
       - name: Download build artifact
         if: ${{ inputs.use-artifact == true }}
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # ratchet:actions/download-artifact@v8.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # ratchet:actions/download-artifact@v8.0.1
         with:
           name: gradle-build-${{ github.run_id }}
           path: build/
 
       - name: Push Docker Image to GAR
-        uses: nais/docker-build-push@ae613eff6f44f0323476eda1c3994a7c518761c3 # ratchet:nais/docker-build-push@v0
+        uses: nais/docker-build-push@078e460885ed0424b60d45ce9220b4be1748be9d # ratchet:nais/docker-build-push@v0
         id: docker-build-push
         with:
           team: okonomi
