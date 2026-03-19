@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # ratchet:step-security/harden-runner@v2.15.0
+        uses: step-security/harden-runner@fa2e9d605c4eeb9fcad4c99c224cee0c6c7f3594 # ratchet:step-security/harden-runner@v2.16.0
         with:
           egress-policy: audit
 
@@ -79,7 +79,7 @@ jobs:
           run_install: false
 
       - name: Set up Node.js
-        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # ratchet:actions/setup-node@v6
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # ratchet:actions/setup-node@v6
         with:
           node-version: ${{ inputs.node-version }}
           cache: "pnpm"
@@ -91,7 +91,7 @@ jobs:
           pnpm config set @navikt:registry https://npm.pkg.github.com
           pnpm install --frozen-lockfile
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
 
       - name: Install dependencies for server
         if: ${{ ! cancelled() && hashFiles('server/package.json') != '' }}
@@ -102,7 +102,7 @@ jobs:
           pnpm config set @navikt:registry https://npm.pkg.github.com
           pnpm install --frozen-lockfile
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
 
       - name: Check for Playwright in package.json
         id: playwright-check
@@ -166,17 +166,17 @@ jobs:
         run: $APP_BUILD_COMMAND
         env:
           APP_BUILD_COMMAND: ${{ inputs.app-build-command }}
-          ASTRO_KEY: ${{ secrets.ASTRO_KEY }}
+          ASTRO_KEY: ${{ secrets.ASTRO_KEY }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
 
       - name: Build app (without Astro)
         if: ${{ env.ASTRO_KEY == '' }}
         run: $APP_BUILD_COMMAND
         env:
           APP_BUILD_COMMAND: ${{ inputs.app-build-command }}
-          ASTRO_KEY: ${{ secrets.ASTRO_KEY }}
+          ASTRO_KEY: ${{ secrets.ASTRO_KEY }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
 
       - name: Push Docker Image to GAR
-        uses: nais/docker-build-push@ae613eff6f44f0323476eda1c3994a7c518761c3 # ratchet:nais/docker-build-push@v0
+        uses: nais/docker-build-push@078e460885ed0424b60d45ce9220b4be1748be9d # ratchet:nais/docker-build-push@v0
         id: docker-build-push
         with:
           team: okonomi
