@@ -72,7 +72,7 @@ jobs:
           pnpm config set @navikt:registry https://npm.pkg.github.com
           pnpm install --frozen-lockfile
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
 
       - name: Install dependencies for server
         if: ${{ ! cancelled() && hashFiles('server/package.json') != '' }}
@@ -83,7 +83,7 @@ jobs:
           pnpm config set @navikt:registry https://npm.pkg.github.com
           pnpm install --frozen-lockfile
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
 
       - name: Check for Playwright in package.json
         id: playwright-check
