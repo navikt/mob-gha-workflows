@@ -29,7 +29,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # ratchet:step-security/harden-runner@v2.16.1
+        uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # ratchet:step-security/harden-runner@v2.17.0
         with:
           egress-policy: audit
 
@@ -54,7 +54,7 @@ jobs:
           category: "/language:${{ matrix.language }}"
 
       - name: Login to Google Artifact Registry
-        uses: nais/login@c88ada9ce583928e1c84d2fd5c45cfacdd18d5de # ratchet:nais/login@v0
+        uses: nais/login@d6ab5d83f735e9f155eb9d7d29cd20ae46820ea9 # ratchet:nais/login@v0
         id: login
         with:
           team: okonomi

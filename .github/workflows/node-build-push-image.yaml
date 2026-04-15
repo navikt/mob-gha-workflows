@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # ratchet:step-security/harden-runner@v2.16.1
+        uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # ratchet:step-security/harden-runner@v2.17.0
         with:
           egress-policy: audit
 
@@ -176,7 +176,7 @@ jobs:
           ASTRO_KEY: ${{ secrets.ASTRO_KEY }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
 
       - name: Push Docker Image to GAR
-        uses: nais/docker-build-push@45d352fb62fb52ccb5ff6cba22c047fa02b35321 # ratchet:nais/docker-build-push@v0
+        uses: nais/docker-build-push@cd5ec5663feb0e05c3fa374d1fb442605b046c6b # ratchet:nais/docker-build-push@v0
         id: docker-build-push
         with:
           team: okonomi
