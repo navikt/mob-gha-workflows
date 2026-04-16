@@ -29,7 +29,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # ratchet:step-security/harden-runner@v2.16.1
+        uses: step-security/harden-runner@6c3c2f2c1c457b00c10c4848d6f5491db3b629df # ratchet:step-security/harden-runner@v2.18.0
         with:
           egress-policy: audit
 
@@ -39,22 +39,22 @@ jobs:
           persist-credentials: false
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@c10b8064de6f491fea524254123dbe5e09572f13 # ratchet:github/codeql-action/init@v4.35.1
+        uses: github/codeql-action/init@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # ratchet:github/codeql-action/init@v4.35.2
         with:
           tools: linked
           languages: ${{ matrix.language }}
           queries: security-extended,security-and-quality
 
       - name: Autobuild
-        uses: github/codeql-action/autobuild@c10b8064de6f491fea524254123dbe5e09572f13 # ratchet:github/codeql-action/autobuild@v4.35.1
+        uses: github/codeql-action/autobuild@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # ratchet:github/codeql-action/autobuild@v4.35.2
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@c10b8064de6f491fea524254123dbe5e09572f13 # ratchet:github/codeql-action/analyze@v4.35.1
+        uses: github/codeql-action/analyze@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # ratchet:github/codeql-action/analyze@v4.35.2
         with:
           category: "/language:${{ matrix.language }}"
 
       - name: Login to Google Artifact Registry
-        uses: nais/login@c88ada9ce583928e1c84d2fd5c45cfacdd18d5de # ratchet:nais/login@v0
+        uses: nais/login@d6ab5d83f735e9f155eb9d7d29cd20ae46820ea9 # ratchet:nais/login@v0
         id: login
         with:
           team: okonomi
@@ -73,7 +73,7 @@ jobs:
           limit-severities-for-sarif: true
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@c10b8064de6f491fea524254123dbe5e09572f13 # ratchet:github/codeql-action/upload-sarif@v4.35.1
+        uses: github/codeql-action/upload-sarif@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # ratchet:github/codeql-action/upload-sarif@v4.35.2
         if: always()
         with:
           sarif_file: "trivy-results.sarif"
