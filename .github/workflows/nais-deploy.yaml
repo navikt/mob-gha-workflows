@@ -26,7 +26,7 @@ jobs:
       deployments: write
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # ratchet:step-security/harden-runner@v2.16.1
+        uses: step-security/harden-runner@6c3c2f2c1c457b00c10c4848d6f5491db3b629df # ratchet:step-security/harden-runner@v2.18.0
         with:
           egress-policy: audit
 
@@ -37,7 +37,7 @@ jobs:
 
       - name: Create GitHub Deployment
         id: deployment
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # ratchet:actions/github-script@v8.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # ratchet:actions/github-script@v9.0.0
         env:
           CLUSTER_NAME: ${{ inputs.cluster }}
         with:
@@ -63,7 +63,7 @@ jobs:
 
       - name: Update Deployment Status
         if: always()
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # ratchet:actions/github-script@v8.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # ratchet:actions/github-script@v9.0.0
         env:
           JOB_STATUS: ${{ job.status }}
           DEPLOYMENT_ID: ${{ steps.deployment.outputs.result }}
@@ -80,7 +80,7 @@ jobs:
 
       - name: Find and Comment on PR
         if: always()
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # ratchet:actions/github-script@v8.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # ratchet:actions/github-script@v9.0.0
         env:
           JOB_STATUS: ${{ job.status }}
           CLUSTER_NAME: ${{ inputs.cluster }}
