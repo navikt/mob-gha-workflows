@@ -60,7 +60,7 @@ jobs:
           team: okonomi
 
       - name: Perform Trivy vulnerability scan on ${{ env.LATEST_PROD_IMAGE }} image
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # ratchet:aquasecurity/trivy-action@v0.35.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # ratchet:aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: "image"
           image-ref: ${{ steps.login.outputs.registry }}/${{ env.LATEST_PROD_IMAGE }}
