@@ -60,7 +60,7 @@ on:
 
     outputs:
       image:
-        description: Google Artifact Registery image
+        description: Google Artifact Registry image
         value: ${{ jobs.build-application-build-push-image.outputs.image }}
 
 jobs:
