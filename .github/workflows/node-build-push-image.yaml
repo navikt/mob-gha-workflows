@@ -168,7 +168,7 @@ jobs:
           APP_BUILD_COMMAND: ${{ inputs.app-build-command }}
           ASTRO_KEY: ${{ secrets.ASTRO_KEY }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
 
-      - name: Prune server devDependencies for production image
+      - name: Prune devDependencies (server) for production image
         if: ${{ ! cancelled() && hashFiles(format('{0}/package.json', inputs.server-directory)) != '' }}
         working-directory: ${{ inputs.server-directory }}
         run: $SERVER_PRUNE_COMMAND
