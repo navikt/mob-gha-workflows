@@ -161,15 +161,8 @@ jobs:
         env:
           SERVER_BUILD_COMMAND: ${{ inputs.server-build-command }}
 
-      - name: Build app (with Astro)
-        if: ${{ env.ASTRO_KEY != '' }}
-        run: $APP_BUILD_COMMAND
-        env:
-          APP_BUILD_COMMAND: ${{ inputs.app-build-command }}
-          ASTRO_KEY: ${{ secrets.ASTRO_KEY }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
-
-      - name: Build app (without Astro)
-        if: ${{ env.ASTRO_KEY == '' }}
+      - name: Build app
+        if: ${{ ! cancelled() }}
         run: $APP_BUILD_COMMAND
         env:
           APP_BUILD_COMMAND: ${{ inputs.app-build-command }}
