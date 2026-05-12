@@ -23,6 +23,11 @@ on:
         type: string
         description: Command to build the server
         default: "pnpm run build"
+      server-prune-dev-deps:
+        required: false
+        type: string
+        description: Command to prune devDependencies from server before building the image
+        default: "pnpm install --prod --frozen-lockfile --ignore-scripts"
       app-build-command:
         required: false
         type: string
@@ -174,6 +179,14 @@ jobs:
         env:
           APP_BUILD_COMMAND: ${{ inputs.app-build-command }}
           ASTRO_KEY: ${{ secrets.ASTRO_KEY }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
+
+      - name: Prune server devDependencies for production image
+        if: ${{ ! cancelled() && hashFiles('server/package.json') != '' }}
+        working-directory: ${{ inputs.server-directory }}
+        run: $SERVER_PRUNE_COMMAND
+        env:
+          SERVER_PRUNE_COMMAND: ${{ inputs.server-prune-dev-deps }}
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
 
       - name: Push Docker Image to GAR
         uses: nais/docker-build-push@be85229e81c0293c265c646c084f05317fb6e0d2 # ratchet:nais/docker-build-push@v0
