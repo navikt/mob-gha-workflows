@@ -89,7 +89,7 @@ jobs:
           node-version: ${{ inputs.node-version }}
           cache: "pnpm"
 
-      - name: Configure pnpm registry
+      - name: Set up pnpm authentication and config
         run: |
           pnpm config set //npm.pkg.github.com/:_authToken $NODE_AUTH_TOKEN
           pnpm config set engine-strict true
