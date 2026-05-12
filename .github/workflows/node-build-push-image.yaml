@@ -175,6 +175,13 @@ jobs:
           APP_BUILD_COMMAND: ${{ inputs.app-build-command }}
           ASTRO_KEY: ${{ secrets.ASTRO_KEY }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
 
+      - name: Prune server devDependencies for production image
+        if: ${{ ! cancelled() && hashFiles('server/package.json') != '' }}
+        working-directory: ${{ inputs.server-directory }}
+        run: pnpm install --prod --frozen-lockfile --ignore-scripts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
+          
       - name: Push Docker Image to GAR
         uses: nais/docker-build-push@be85229e81c0293c265c646c084f05317fb6e0d2 # ratchet:nais/docker-build-push@v0
         id: docker-build-push
