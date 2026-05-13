@@ -60,7 +60,7 @@ on:
 
     outputs:
       image:
-        description: Google Artifact Registery image
+        description: Google Artifact Registry image
         value: ${{ jobs.build-application-build-push-image.outputs.image }}
 
 jobs:
@@ -89,25 +89,21 @@ jobs:
           node-version: ${{ inputs.node-version }}
           cache: "pnpm"
 
-      - name: Install dependencies for client
+      - name: Set up pnpm authentication and config
         run: |
           pnpm config set //npm.pkg.github.com/:_authToken $NODE_AUTH_TOKEN
           pnpm config set engine-strict true
           pnpm config set @navikt:registry https://npm.pkg.github.com
-          pnpm install --frozen-lockfile
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
 
+      - name: Install dependencies for client
+        run: pnpm install --frozen-lockfile
+
       - name: Install dependencies for server
-        if: ${{ ! cancelled() && hashFiles('server/package.json') != '' }}
+        if: ${{ ! cancelled() && hashFiles(format('{0}/package.json', inputs.server-directory)) != '' }}
         working-directory: ${{ inputs.server-directory }}
-        run: |
-          pnpm config set //npm.pkg.github.com/:_authToken $NODE_AUTH_TOKEN
-          pnpm config set engine-strict true
-          pnpm config set @navikt:registry https://npm.pkg.github.com
-          pnpm install --frozen-lockfile
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
+        run: pnpm install --frozen-lockfile
 
       - name: Check for Playwright in package.json
         id: playwright-check
@@ -132,7 +128,6 @@ jobs:
         id: playwright-version
         run: |
           PLAYWRIGHT_VERSION=$(pnpm list @playwright/test --json | jq -r '.[0].devDependencies["@playwright/test"].version')
-          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_OUTPUT
 
       - name: Cache Playwright browsers (if Playwright is present)
@@ -160,28 +155,21 @@ jobs:
           VITEST_COMMAND: ${{ inputs.vitest-command }}
 
       - name: Build server
-        if: ${{ ! cancelled() && hashFiles('server/package.json') != '' }}
+        if: ${{ ! cancelled() && hashFiles(format('{0}/package.json', inputs.server-directory)) != '' }}
         working-directory: ${{ inputs.server-directory }}
         run: $SERVER_BUILD_COMMAND
         env:
           SERVER_BUILD_COMMAND: ${{ inputs.server-build-command }}
 
-      - name: Build app (with Astro)
-        if: ${{ env.ASTRO_KEY != '' }}
+      - name: Build app
+        if: ${{ ! cancelled() }}
         run: $APP_BUILD_COMMAND
         env:
           APP_BUILD_COMMAND: ${{ inputs.app-build-command }}
           ASTRO_KEY: ${{ secrets.ASTRO_KEY }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
 
-      - name: Build app (without Astro)
-        if: ${{ env.ASTRO_KEY == '' }}
-        run: $APP_BUILD_COMMAND
-        env:
-          APP_BUILD_COMMAND: ${{ inputs.app-build-command }}
-          ASTRO_KEY: ${{ secrets.ASTRO_KEY }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
-
-      - name: Prune server devDependencies for production image
-        if: ${{ ! cancelled() && hashFiles('server/package.json') != '' }}
+      - name: Prune devDependencies (server) for production image
+        if: ${{ ! cancelled() && hashFiles(format('{0}/package.json', inputs.server-directory)) != '' }}
         working-directory: ${{ inputs.server-directory }}
         run: $SERVER_PRUNE_COMMAND
         env:
