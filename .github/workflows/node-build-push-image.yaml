@@ -3,11 +3,6 @@ name: Build application & build/push image
 on:
   workflow_call:
     inputs:
-      pnpm-version:
-        required: false
-        type: string
-        description: pnpm version to build with
-        default: "10"
       node-version:
         required: false
         type: string
@@ -80,7 +75,6 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d # ratchet:pnpm/action-setup@v6.0.5
         with:
-          version: ${{ inputs.pnpm-version }}
           run_install: false
 
       - name: Set up Node.js
@@ -92,9 +86,9 @@ jobs:
       - name: Set up pnpm authentication and config
         run: |
           pnpm config set //npm.pkg.github.com/:_authToken $NODE_AUTH_TOKEN
-          pnpm config set engine-strict true
-          pnpm config set ignore-scripts true
-          pnpm config set minimum-release-age 10080
+          pnpm config set engineStrict true
+          pnpm config set ignoreScripts true
+          pnpm config set minimumReleaseAge 10080
           pnpm config set @navikt:registry https://npm.pkg.github.com
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
