@@ -38,11 +38,21 @@ on:
         type: string
         description: Suffix to append to the image tag
         default: ""
+      has-vitest:
+        required: false
+        type: boolean
+        description: Whether the project has Vitest configured
+        default: false
       vitest-command:
         required: false
         type: string
         description: Command to run Vitest tests
         default: "pnpm run vitest"
+      has-playwright:
+        required: false
+        type: boolean
+        description: Whether the project has Playwright configured
+        default: false
       playwright-command:
         required: false
         type: string
@@ -97,75 +107,61 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install dependencies for server
-        if: ${{ ! cancelled() && hashFiles(format('{0}/package.json', inputs.server-directory)) != '' }}
+        if: ${{ hashFiles(format('{0}/package.json', inputs.server-directory)) != '' }}
         working-directory: ${{ inputs.server-directory }}
         run: pnpm install --frozen-lockfile
 
-      - name: Check for Playwright in package.json
-        id: playwright-check
-        run: |
-          if grep -q '"playwright".*:' package.json; then
-            echo "found=true" >> $GITHUB_OUTPUT
-          else
-            echo "found=false" >> $GITHUB_OUTPUT
-          fi
+      - name: Verify package signatures (client)
+        run: pnpm audit signatures
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
 
-      - name: Check for Vitest in package.json
-        id: vitest-check
-        run: |
-          if grep -q '"vitest".*:' package.json; then
-            echo "found=true" >> $GITHUB_OUTPUT
-          else
-            echo "found=false" >> $GITHUB_OUTPUT
-          fi
+      - name: Verify package signatures (server)
+        if: ${{ hashFiles(format('{0}/package.json', inputs.server-directory)) != '' }}
+        working-directory: ${{ inputs.server-directory }}
+        run: pnpm audit signatures
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
 
-      - name: Get Playwright version (if Playwright is present)
-        if: ${{ steps.playwright-check.outputs.found == 'true' }}
-        id: playwright-version
-        run: |
-          PLAYWRIGHT_VERSION=$(pnpm list @playwright/test --json | jq -r '.[0].devDependencies["@playwright/test"].version')
-          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_OUTPUT
-
-      - name: Cache Playwright browsers (if Playwright is present)
-        if: ${{ steps.playwright-check.outputs.found == 'true' }}
+      - name: Cache Playwright browsers
+        if: ${{ inputs.has-playwright }}
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # ratchet:actions/cache@v5.0.5
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.PLAYWRIGHT_VERSION }}
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
 
-      - name: Install Playwright browsers (if Playwright is present and cache missed)
-        if: ${{ steps.playwright-check.outputs.found == 'true' && steps.playwright-cache.outputs.cache-hit != 'true' }}
+      - name: Install Playwright browsers (if cache miss)
+        if: ${{ inputs.has-playwright && steps.playwright-cache.outputs.cache-hit != 'true' }}
         run: pnpm exec playwright install --with-deps
 
-      - name: Run Playwright (if configured)
-        if: ${{ steps.playwright-check.outputs.found == 'true' }}
+      - name: Run Playwright
+        if: ${{ inputs.has-playwright }}
         run: $PLAYWRIGHT_COMMAND
         env:
           PLAYWRIGHT_COMMAND: ${{ inputs.playwright-command }}
 
-      - name: Run Vitest (if configured)
-        if: ${{ steps.vitest-check.outputs.found == 'true' }}
+      - name: Run Vitest
+        if: ${{ inputs.has-vitest }}
         run: $VITEST_COMMAND
         env:
           VITEST_COMMAND: ${{ inputs.vitest-command }}
 
       - name: Build server
-        if: ${{ ! cancelled() && hashFiles(format('{0}/package.json', inputs.server-directory)) != '' }}
+        if: ${{ hashFiles(format('{0}/package.json', inputs.server-directory)) != '' }}
         working-directory: ${{ inputs.server-directory }}
         run: $SERVER_BUILD_COMMAND
         env:
           SERVER_BUILD_COMMAND: ${{ inputs.server-build-command }}
 
       - name: Build app
-        if: ${{ ! cancelled() }}
         run: $APP_BUILD_COMMAND
         env:
           APP_BUILD_COMMAND: ${{ inputs.app-build-command }}
           ASTRO_KEY: ${{ secrets.ASTRO_KEY }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
 
       - name: Prune devDependencies (server) for production image
-        if: ${{ ! cancelled() && hashFiles(format('{0}/package.json', inputs.server-directory)) != '' }}
+        if: ${{ hashFiles(format('{0}/package.json', inputs.server-directory)) != '' }}
         working-directory: ${{ inputs.server-directory }}
         run: $SERVER_PRUNE_COMMAND
         env:
