@@ -83,7 +83,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up pnpm
-        uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d # ratchet:pnpm/action-setup@v6.0.5
+        uses: pnpm/action-setup@739bfe42ca9233c5e6aca07c1a25a9d34aca49b0 # ratchet:pnpm/action-setup@v6.0.7
         with:
           run_install: false
 
@@ -169,7 +169,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
 
       - name: Push Docker Image to GAR
-        uses: nais/docker-build-push@be85229e81c0293c265c646c084f05317fb6e0d2 # ratchet:nais/docker-build-push@v0
+        uses: nais/docker-build-push@751a312f0803eb96a05a41fadf51be19b7be362c # ratchet:nais/docker-build-push@v0
         id: docker-build-push
         with:
           team: okonomi

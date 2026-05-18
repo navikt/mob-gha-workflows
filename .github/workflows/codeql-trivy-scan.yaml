@@ -39,17 +39,17 @@ jobs:
           persist-credentials: false
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@e46ed2cbd01164d986452f91f178727624ae40d7 # ratchet:github/codeql-action/init@v4.35.3
+        uses: github/codeql-action/init@68bde559dea0fdcac2102bfdf6230c5f70eb485e # ratchet:github/codeql-action/init@v4.35.4
         with:
           tools: linked
           languages: ${{ matrix.language }}
           queries: security-extended,security-and-quality
 
       - name: Autobuild
-        uses: github/codeql-action/autobuild@e46ed2cbd01164d986452f91f178727624ae40d7 # ratchet:github/codeql-action/autobuild@v4.35.3
+        uses: github/codeql-action/autobuild@68bde559dea0fdcac2102bfdf6230c5f70eb485e # ratchet:github/codeql-action/autobuild@v4.35.4
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@e46ed2cbd01164d986452f91f178727624ae40d7 # ratchet:github/codeql-action/analyze@v4.35.3
+        uses: github/codeql-action/analyze@68bde559dea0fdcac2102bfdf6230c5f70eb485e # ratchet:github/codeql-action/analyze@v4.35.4
         with:
           category: "/language:${{ matrix.language }}"
 
@@ -73,7 +73,7 @@ jobs:
           limit-severities-for-sarif: true
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@e46ed2cbd01164d986452f91f178727624ae40d7 # ratchet:github/codeql-action/upload-sarif@v4.35.3
+        uses: github/codeql-action/upload-sarif@68bde559dea0fdcac2102bfdf6230c5f70eb485e # ratchet:github/codeql-action/upload-sarif@v4.35.4
         if: always()
         with:
           sarif_file: "trivy-results.sarif"
