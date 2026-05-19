@@ -18,15 +18,6 @@ on:
         type: boolean
         default: false
         description: Upload build artifact for Docker image builds
-      generate-dependency-graph:
-        required: false
-        type: boolean
-        default: false
-        description: Generate and submit dependency graph
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   build-and-test:
@@ -48,17 +39,7 @@ jobs:
           distribution: "temurin"
           java-version: ${{ inputs.java-version }}
 
-      - name: Setup Gradle (with dependency graph submission)
-        if: ${{ inputs.generate-dependency-graph == true }}
-        uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # ratchet:gradle/actions/setup-gradle@v6.1.0
-        env: # Eksluder test dependencies
-          DEPENDENCY_GRAPH_INCLUDE_CONFIGURATIONS: compileClasspath|runtimeClasspath
-        with:
-          cache-provider: basic
-          dependency-graph: generate-and-submit
-
       - name: Setup Gradle
-        if: ${{ inputs.generate-dependency-graph != true }}
         uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # ratchet:gradle/actions/setup-gradle@v6.1.0
         with:
           cache-provider: basic

@@ -44,10 +44,6 @@ on:
         description: Command to run Playwright tests
         default: "pnpm run playwright"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   build-test-pr:
     runs-on: ubuntu-latest

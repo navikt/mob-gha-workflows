@@ -9,12 +9,6 @@ on:
     - cron: "0 6 * * 1"
   workflow_dispatch:
 
-permissions: {}
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
 jobs:
   actions-dependencies-submit:
     runs-on: ubuntu-latest
