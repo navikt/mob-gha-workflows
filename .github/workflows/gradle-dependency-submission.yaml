@@ -2,17 +2,6 @@ name: Gradle Dependency Submission
 
 on:
   workflow_call:
-    inputs:
-      java-version:
-        required: false
-        type: string
-        description: Java version to resolve dependencies with
-        default: "25"
-      exclude-configurations:
-        required: false
-        type: string
-        description: Regex for Gradle configurations to exclude from the dependency graph
-        default: ".*[Tt]est(Compile|Runtime)Classpath"
 
 jobs:
   dependency-submission:
@@ -30,13 +19,5 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up JDK
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # ratchet:actions/setup-java@v5.2.0
-        with:
-          distribution: "temurin"
-          java-version: ${{ inputs.java-version }}
-
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # ratchet:gradle/actions/dependency-submission@v6.1.0
-        with:
-          dependency-graph-exclude-configurations: ${{ inputs.exclude-configurations }}
