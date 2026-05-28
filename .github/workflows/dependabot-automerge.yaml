@@ -52,12 +52,12 @@ jobs:
       merged-pr-count: ${{ steps.automerge.outputs.merged-pr-count }}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # ratchet:step-security/harden-runner@v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # ratchet:step-security/harden-runner@v2.19.4
         with:
           egress-policy: audit
 
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # ratchet:actions/create-github-app-token@v3.1.1
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # ratchet:actions/create-github-app-token@v3.2.0
         id: app-token
         with:
           client-id: ${{ secrets.APP_ID }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
