@@ -43,10 +43,8 @@ jobs:
         with:
           tools: linked
           languages: ${{ matrix.language }}
+          build-mode: ${{ contains(fromJSON('["kotlin","java-kotlin","java"]'), inputs.language) && 'autobuild' || 'none' }}
           queries: security-extended,security-and-quality
-
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # ratchet:github/codeql-action/autobuild@v4.36.0
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # ratchet:github/codeql-action/analyze@v4.36.0
