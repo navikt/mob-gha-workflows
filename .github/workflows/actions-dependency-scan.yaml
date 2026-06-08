@@ -27,7 +27,7 @@ jobs:
           persist-credentials: false
 
       - name: Submit Actions dependencies
-        uses: jessehouwing/actions-dependency-submission@19481049f19a8b6d54adbde7c323de5184b8bab5 # ratchet:jessehouwing/actions-dependency-submission@v1.0.14
+        uses: jessehouwing/actions-dependency-submission@d4ed9fd03b1c91e31a62d9a4095440128ec1316b # ratchet:jessehouwing/actions-dependency-submission@v1.0.15
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
