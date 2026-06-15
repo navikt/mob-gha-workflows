@@ -13,7 +13,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # ratchet:actions/checkout@v6.0.3
         with:
           persist-credentials: false
           fetch-depth: 0
@@ -26,6 +26,6 @@ jobs:
         id: modified-migrations
 
       - name: Run Squawk Lint
-        uses: sbdchd/squawk-action@68d739e098ab69cf46c64fdbf6175bb29d195a16 # ratchet:sbdchd/squawk-action@v2
+        uses: sbdchd/squawk-action@8d113898e16c6cfd417ceba848b0edad97882be3 # ratchet:sbdchd/squawk-action@v2
         with:
           files: ${{ steps.modified-migrations.outputs.file_names }}
