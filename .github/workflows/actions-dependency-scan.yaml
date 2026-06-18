@@ -4,7 +4,17 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - "**/*.md"
+      - ".gitignore"
+      - "CODEOWNERS"
+      - "LICENSE"
   pull_request:
+    paths-ignore:
+      - "**/*.md"
+      - ".gitignore"
+      - "CODEOWNERS"
+      - "LICENSE"
   schedule:
     - cron: "0 6 * * 1"
   workflow_dispatch:
