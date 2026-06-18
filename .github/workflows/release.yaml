@@ -59,11 +59,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           MAJOR=$(echo "${REF_NAME}" | grep -oE '^v[0-9]+')
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          SHA=$(git rev-parse HEAD)
 
-          git tag -d "${MAJOR}" 2>/dev/null || true
-          git push origin ":refs/tags/${MAJOR}" 2>/dev/null || true
-
-          git tag -a "${MAJOR}" -m "Latest ${MAJOR}.x release (${REF_NAME})"
-          git push origin "${MAJOR}"
+          gh api --method PATCH "/repos/${GITHUB_REPOSITORY}/git/refs/tags/${MAJOR}" \
+            --field sha="${SHA}" \
+            --field force=true 2>/dev/null || \
+          gh api --method POST "/repos/${GITHUB_REPOSITORY}/git/refs" \
+            --field ref="refs/tags/${MAJOR}" \
+            --field sha="${SHA}"
