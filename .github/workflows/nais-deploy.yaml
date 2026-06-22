@@ -26,18 +26,18 @@ jobs:
       deployments: write
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # ratchet:step-security/harden-runner@v2.19.4
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
       - name: Checkout repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # ratchet:actions/checkout@v6.0.3
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 
       - name: Create GitHub Deployment
         id: deployment
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # ratchet:actions/github-script@v9.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           CLUSTER_NAME: ${{ inputs.cluster }}
         with:
@@ -53,7 +53,7 @@ jobs:
             return deployment.data.id;
 
       - name: Deploy to NAIS
-        uses: nais/deploy/actions/deploy@5fdd91aaf69bb0d6dd5e5118cdacb639f487b93b # ratchet:nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@5fdd91aaf69bb0d6dd5e5118cdacb639f487b93b # v2
         env:
           CLUSTER: ${{ inputs.cluster }}
           RESOURCE: ${{ inputs.resource }}
@@ -63,7 +63,7 @@ jobs:
 
       - name: Update Deployment Status
         if: always()
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # ratchet:actions/github-script@v9.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           JOB_STATUS: ${{ job.status }}
           DEPLOYMENT_ID: ${{ steps.deployment.outputs.result }}
@@ -80,7 +80,7 @@ jobs:
 
       - name: Find and Comment on PR
         if: always()
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # ratchet:actions/github-script@v9.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           JOB_STATUS: ${{ job.status }}
           CLUSTER_NAME: ${{ inputs.cluster }}
