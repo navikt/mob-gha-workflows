@@ -1,0 +1,6 @@
+rules:
+  ref-version-mismatch:
+    # Disabled because all actions use ratchet-format comments (# ratchet:action@version)
+    # which zizmor does not recognize. Since ratchet manages SHA-to-version consistency
+    # automatically, this rule produces only false positives for this repository.
+    disable: true
