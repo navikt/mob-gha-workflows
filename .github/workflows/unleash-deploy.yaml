@@ -29,7 +29,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Deploy to NAIS
-        uses: nais/deploy/actions/deploy@a7f8690f9b367fcbf5348a0a1e21d44f1aae50eb # ratchet:nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@2d18f050f07b6a007864c6a57070ed915d571beb # ratchet:nais/deploy/actions/deploy@v2
         env:
           CLUSTER: ${{ inputs.cluster }}
           RESOURCE: ${{ inputs.resource }}
