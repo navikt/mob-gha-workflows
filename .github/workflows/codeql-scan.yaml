@@ -29,7 +29,7 @@ jobs:
           persist-credentials: false
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@7188fc363630916deb702c7fdcf4e481b751f97a # ratchet:github/codeql-action/init@v4.37.1
+        uses: github/codeql-action/init@f205ea1c3313d32999d8d6a48b4f6530d4437b38  # ratchet:github/codeql-action/init@v4.37.4
         with:
           tools: linked
           languages: ${{ matrix.language }}
@@ -37,6 +37,6 @@ jobs:
           queries: security-and-quality
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@7188fc363630916deb702c7fdcf4e481b751f97a # ratchet:github/codeql-action/analyze@v4.37.1
+        uses: github/codeql-action/analyze@f205ea1c3313d32999d8d6a48b4f6530d4437b38  # ratchet:github/codeql-action/analyze@v4.37.4
         with:
           category: "/language:${{ matrix.language }}"
