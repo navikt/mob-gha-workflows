@@ -8,6 +8,11 @@ on:
         type: string
         description: Java version to build with
         default: "25"
+      project-directory:
+        required: false
+        type: string
+        description: Root directory of the Gradle project, relative to repo root. Use for monorepos where the build is not at repo root.
+        default: "."
       gradle-task:
         required: false
         type: string
@@ -45,6 +50,7 @@ jobs:
           cache-provider: basic
 
       - name: Build and test application
+        working-directory: ${{ inputs.project-directory }}
         env:
           GRADLE_TASK: ${{ inputs.gradle-task }}
         run: $GRADLE_TASK
@@ -54,5 +60,5 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # ratchet:actions/upload-artifact@v7.0.1
         with:
           name: gradle-build-${{ github.run_id }}
-          path: build/
+          path: ${{ inputs.project-directory }}/build/
           retention-days: 1

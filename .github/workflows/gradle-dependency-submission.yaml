@@ -8,6 +8,11 @@ on:
         type: string
         description: Java version to build with
         default: "25"
+      project-directory:
+        required: false
+        type: string
+        description: Root directory of the Gradle project, relative to repo root. Use for monorepos where the build is not at repo root.
+        default: "."
 
 jobs:
   dependency-submission:
@@ -34,3 +39,5 @@ jobs:
 
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@9c971963bec38e04b3d30dcc455b5382be2fdbfb # ratchet:gradle/actions/dependency-submission@v6.3.0
+        with:
+          build-root-directory: ${{ inputs.project-directory }}

@@ -8,6 +8,11 @@ on:
         type: string
         description: Node version to build with
         default: "24"
+      project-directory:
+        required: false
+        type: string
+        description: Root directory of the Node.js project (client app), relative to repo root. Use for monorepos where the app is not at repo root.
+        default: "."
       server-directory:
         required: false
         type: string
@@ -38,6 +43,16 @@ on:
         type: string
         description: Suffix to append to the image tag
         default: ""
+      docker-context:
+        required: false
+        type: string
+        description: Path to the Docker build context
+        default: "."
+      dockerfile:
+        required: false
+        type: string
+        description: Path to the Dockerfile
+        default: "Dockerfile"
       has-vitest:
         required: false
         type: boolean
@@ -92,6 +107,7 @@ jobs:
         with:
           node-version: ${{ inputs.node-version }}
           cache: "pnpm"
+          cache-dependency-path: ${{ inputs.project-directory }}/pnpm-lock.yaml
 
       - name: Set up pnpm authentication and config
         run: |
@@ -103,22 +119,37 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
 
+      - name: Resolve directories
+        id: dirs
+        run: |
+          PROJECT_DIR="${{ inputs.project-directory }}"
+          SERVER_SUBDIR="${{ inputs.server-directory }}"
+          if [ "$PROJECT_DIR" = "." ]; then
+            SERVER_DIR="$SERVER_SUBDIR"
+          else
+            SERVER_DIR="$PROJECT_DIR/$SERVER_SUBDIR"
+          fi
+          echo "project-dir=$PROJECT_DIR" >> "$GITHUB_OUTPUT"
+          echo "server-dir=$SERVER_DIR" >> "$GITHUB_OUTPUT"
+
       - name: Install dependencies for client
+        working-directory: ${{ steps.dirs.outputs.project-dir }}
         run: pnpm install --frozen-lockfile
 
       - name: Install dependencies for server
-        if: ${{ hashFiles(format('{0}/package.json', inputs.server-directory)) != '' }}
-        working-directory: ${{ inputs.server-directory }}
+        if: ${{ hashFiles(format('{0}/package.json', steps.dirs.outputs.server-dir)) != '' }}
+        working-directory: ${{ steps.dirs.outputs.server-dir }}
         run: pnpm install --frozen-lockfile
 
       - name: Verify package signatures (client)
+        working-directory: ${{ steps.dirs.outputs.project-dir }}
         run: pnpm audit signatures
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
 
       - name: Verify package signatures (server)
-        if: ${{ hashFiles(format('{0}/package.json', inputs.server-directory)) != '' }}
-        working-directory: ${{ inputs.server-directory }}
+        if: ${{ hashFiles(format('{0}/package.json', steps.dirs.outputs.server-dir)) != '' }}
+        working-directory: ${{ steps.dirs.outputs.server-dir }}
         run: pnpm audit signatures
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
@@ -129,40 +160,44 @@ jobs:
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-playwright-${{ hashFiles(format('{0}/pnpm-lock.yaml', steps.dirs.outputs.project-dir)) }}
 
       - name: Install Playwright browsers (if cache miss)
         if: ${{ inputs.has-playwright && steps.playwright-cache.outputs.cache-hit != 'true' }}
+        working-directory: ${{ steps.dirs.outputs.project-dir }}
         run: pnpm exec playwright install --with-deps
 
       - name: Run Playwright
         if: ${{ inputs.has-playwright }}
+        working-directory: ${{ steps.dirs.outputs.project-dir }}
         run: $PLAYWRIGHT_COMMAND
         env:
           PLAYWRIGHT_COMMAND: ${{ inputs.playwright-command }}
 
       - name: Run Vitest
         if: ${{ inputs.has-vitest }}
+        working-directory: ${{ steps.dirs.outputs.project-dir }}
         run: $VITEST_COMMAND
         env:
           VITEST_COMMAND: ${{ inputs.vitest-command }}
 
       - name: Build server
-        if: ${{ hashFiles(format('{0}/package.json', inputs.server-directory)) != '' }}
-        working-directory: ${{ inputs.server-directory }}
+        if: ${{ hashFiles(format('{0}/package.json', steps.dirs.outputs.server-dir)) != '' }}
+        working-directory: ${{ steps.dirs.outputs.server-dir }}
         run: $SERVER_BUILD_COMMAND
         env:
           SERVER_BUILD_COMMAND: ${{ inputs.server-build-command }}
 
       - name: Build app
+        working-directory: ${{ steps.dirs.outputs.project-dir }}
         run: $APP_BUILD_COMMAND
         env:
           APP_BUILD_COMMAND: ${{ inputs.app-build-command }}
           ASTRO_KEY: ${{ secrets.ASTRO_KEY }} # zizmor: ignore[secrets-outside-env] reusable workflow consumes caller-provided org/environment secret
 
       - name: Prune devDependencies (server) for production image
-        if: ${{ hashFiles(format('{0}/package.json', inputs.server-directory)) != '' }}
-        working-directory: ${{ inputs.server-directory }}
+        if: ${{ hashFiles(format('{0}/package.json', steps.dirs.outputs.server-dir)) != '' }}
+        working-directory: ${{ steps.dirs.outputs.server-dir }}
         run: $SERVER_PRUNE_COMMAND
         env:
           SERVER_PRUNE_COMMAND: ${{ inputs.server-prune-dev-deps }}
@@ -173,6 +208,8 @@ jobs:
         id: docker-build-push
         with:
           team: okonomi
+          dockerfile: ${{ inputs.dockerfile }}
+          docker_context: ${{ inputs.docker-context }}
           image_suffix: ${{ inputs.image-suffix }}
           tag: ${{ inputs.image-tag }}
 
