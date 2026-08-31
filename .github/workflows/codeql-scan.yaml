@@ -7,6 +7,16 @@ on:
         required: true
         type: string
         description: "Programming language to analyze (eg: java or javascript)"
+      project-directory:
+        required: false
+        type: string
+        description: Root directory of the project to build, relative to repo root. Use for monorepos where the build is not at repo root. Only relevant for compiled languages (kotlin, java, java-kotlin).
+        default: "."
+      build-command:
+        required: false
+        type: string
+        description: Build command to run for compiled languages when project-directory is not repo root. Ignored for languages that use autobuild (project-directory == ".") or that don't require a build (eg. javascript).
+        default: "./gradlew build -x test --configuration-cache"
 
 jobs:
   codeql-scan:
@@ -28,13 +38,27 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Set up JDK
+        if: ${{ contains(fromJSON('["kotlin","java-kotlin","java"]'), inputs.language) && inputs.project-directory != '.' }}
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # ratchet:actions/setup-java@v5.7.0
+        with:
+          distribution: "temurin"
+          java-version: "25"
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd  # ratchet:github/codeql-action/init@v4.37.7
         with:
           tools: linked
           languages: ${{ matrix.language }}
-          build-mode: ${{ contains(fromJSON('["kotlin","java-kotlin","java"]'), inputs.language) && 'autobuild' || 'none' }}
+          build-mode: ${{ contains(fromJSON('["kotlin","java-kotlin","java"]'), inputs.language) && (inputs.project-directory == '.' && 'autobuild' || 'manual') || 'none' }}
           queries: security-and-quality
+
+      - name: Build (monorepo project-directory)
+        if: ${{ contains(fromJSON('["kotlin","java-kotlin","java"]'), inputs.language) && inputs.project-directory != '.' }}
+        working-directory: ${{ inputs.project-directory }}
+        env:
+          BUILD_COMMAND: ${{ inputs.build-command }}
+        run: $BUILD_COMMAND
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd  # ratchet:github/codeql-action/analyze@v4.37.7
