@@ -40,13 +40,13 @@ jobs:
 
       - name: Set up JDK
         if: ${{ contains(fromJSON('["kotlin","java-kotlin","java"]'), inputs.language) && inputs.project-directory != '.' }}
-        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # ratchet:actions/setup-java@v5.7.0
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # ratchet:actions/setup-java@v6.0.0
         with:
           distribution: "temurin"
           java-version: "25"
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd  # ratchet:github/codeql-action/init@v4.37.7
+        uses: github/codeql-action/init@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28  # ratchet:github/codeql-action/init@v4.37.8
         with:
           tools: linked
           languages: ${{ matrix.language }}
@@ -61,6 +61,6 @@ jobs:
         run: $BUILD_COMMAND
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd  # ratchet:github/codeql-action/analyze@v4.37.7
+        uses: github/codeql-action/analyze@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28  # ratchet:github/codeql-action/analyze@v4.37.8
         with:
           category: "/language:${{ matrix.language }}"
