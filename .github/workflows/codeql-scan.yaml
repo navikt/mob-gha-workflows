@@ -29,7 +29,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # ratchet:step-security/harden-runner@v2.21.0
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # ratchet:step-security/harden-runner@v2.21.1
         with:
           egress-policy: audit
 
@@ -46,7 +46,7 @@ jobs:
           java-version: "25"
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28  # ratchet:github/codeql-action/init@v4.37.8
+        uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938  # ratchet:github/codeql-action/init@v4.37.9
         with:
           tools: linked
           languages: ${{ matrix.language }}
@@ -61,6 +61,6 @@ jobs:
         run: $BUILD_COMMAND
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28  # ratchet:github/codeql-action/analyze@v4.37.8
+        uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938  # ratchet:github/codeql-action/analyze@v4.37.9
         with:
           category: "/language:${{ matrix.language }}"
