@@ -23,6 +23,11 @@ on:
         required: false
         type: string
         default: ""
+      required-labels:
+        description: "Only automerge PRs with at least one of these labels (e.g. 'javascript' or 'javascript,java'). Empty means all Dependabot PRs are considered."
+        required: false
+        type: string
+        default: ""
       auto-approve:
         description: "Whether to automatically approve PRs before merging them"
         required: false
@@ -67,7 +72,7 @@ jobs:
 
       - name: Automerge Dependabot PRs
         id: automerge
-        uses: navikt/automerge-dependabot@70455df4433fac78f20d5a248f9ebf07ccac11fe # ratchet:navikt/automerge-dependabot@v1.5
+        uses: navikt/automerge-dependabot@09f5db3dd1413c6de20825c6b6c3e1cb682c92de # ratchet:navikt/automerge-dependabot@v1.6.0
         with:
           token: ${{ steps.app-token.outputs.token }}
           minimum-age-of-pr: ${{ inputs.minimum-age-of-pr }}
@@ -75,6 +80,7 @@ jobs:
           ignored-dependencies: ${{ inputs.ignored-dependencies }}
           semver-filter: ${{ inputs.semver-filter }}
           always-allow: ${{ inputs.always-allow }}
+          required-labels: ${{ inputs.required-labels }}
           auto-approve: ${{ inputs.auto-approve }}
           merge-method: ${{ inputs.merge-method }}
 
