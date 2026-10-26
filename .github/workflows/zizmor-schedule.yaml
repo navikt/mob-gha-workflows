@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # ratchet:step-security/harden-runner@v2.21.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # ratchet:step-security/harden-runner@v2.22.2
         with:
           egress-policy: audit
 
@@ -23,7 +23,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # ratchet:astral-sh/setup-uv@v10.2.0
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # ratchet:astral-sh/setup-uv@v10.3.0
 
       - name: Perform zizmor analysis
         run: uvx zizmor --format=sarif . > results.sarif
@@ -31,7 +31,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload zizmor analysis results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # ratchet:github/codeql-action/upload-sarif@v4.38.2
+        uses: github/codeql-action/upload-sarif@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # ratchet:github/codeql-action/upload-sarif@v4.39.0
         with:
           sarif_file: results.sarif
           category: zizmor

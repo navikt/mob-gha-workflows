@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # ratchet:step-security/harden-runner@v2.21.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # ratchet:step-security/harden-runner@v2.22.2
         with:
           egress-policy: audit
 
@@ -37,7 +37,7 @@ jobs:
           persist-credentials: false
 
       - name: Submit Actions dependencies
-        uses: jessehouwing/actions-dependency-submission@aa358ec7aee0a7f2dbaef9702915b28e90879842 # ratchet:jessehouwing/actions-dependency-submission@v1.0.17
+        uses: jessehouwing/actions-dependency-submission@811981eec3c108f41783f194522fde91a34301a4 # ratchet:jessehouwing/actions-dependency-submission@v2.0.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -51,7 +51,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # ratchet:step-security/harden-runner@v2.21.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # ratchet:step-security/harden-runner@v2.22.2
         with:
           egress-policy: audit
 
