@@ -21,7 +21,7 @@ jobs:
       contents: write
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # ratchet:step-security/harden-runner@v2.22.2
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # ratchet:step-security/harden-runner@v2.22.3
         with:
           egress-policy: audit
 
@@ -38,6 +38,6 @@ jobs:
           cache: gradle
 
       - name: Generate and submit dependency graph
-        uses: gradle/actions/dependency-submission@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # ratchet:gradle/actions/dependency-submission@v6.4.0
+        uses: gradle/actions/dependency-submission@8da46b539cd8fe6ab27ca75128919a18d757604c # ratchet:gradle/actions/dependency-submission@v6.4.1
         with:
           build-root-directory: ${{ inputs.project-directory }}

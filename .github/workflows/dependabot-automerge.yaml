@@ -57,7 +57,7 @@ jobs:
       merged-pr-count: ${{ steps.automerge.outputs.merged-pr-count }}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # ratchet:step-security/harden-runner@v2.22.2
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # ratchet:step-security/harden-runner@v2.22.3
         with:
           egress-policy: audit
 
@@ -72,7 +72,7 @@ jobs:
 
       - name: Automerge Dependabot PRs
         id: automerge
-        uses: navikt/automerge-dependabot@09f5db3dd1413c6de20825c6b6c3e1cb682c92de # ratchet:navikt/automerge-dependabot@v1.6.0
+        uses: navikt/automerge-dependabot@2c57e8fdb262ad558901e1242c89b19346e3a7a1 # ratchet:navikt/automerge-dependabot@v1.7.0
         with:
           token: ${{ steps.app-token.outputs.token }}
           minimum-age-of-pr: ${{ inputs.minimum-age-of-pr }}
